@@ -9,10 +9,14 @@ import java.util.List;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.osgi.framework.BundleContext;
 
 import com.github.otymko.dt.bsl.lsconnector.lsp.BSLConnector;
 import com.github.otymko.dt.bsl.lsconnector.lsp.BSLLanguageClient;
+import com.github.otymko.dt.bsl.lsconnector.ui.BSLPreferencePage;
+import com.google.common.base.Optional;
 
 public class BSLPlugin extends Plugin {
 	public static final String PLUGIN_ID = "com.github.otymko.dt.bsl.ls_connector";
@@ -21,6 +25,8 @@ public class BSLPlugin extends Plugin {
 	private static BundleContext context;
 	private Process processLSP;
 	private BSLConnector bslConnector;
+	
+	private ScopedPreferenceStore preferenceStore;
 
 	public static BSLPlugin getPlugin() {
 		return plugin;
@@ -30,7 +36,9 @@ public class BSLPlugin extends Plugin {
 		plugin = this;
 		super.start(bundleContext);
 		BSLPlugin.context = bundleContext;
-
+		
+		preferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, "com.github.otymko.dt.bsl.lsconnector.plugin.page");
+		
 		runBSLLS();
 		bindingLSP();
 	}
@@ -64,13 +72,17 @@ public class BSLPlugin extends Plugin {
 	public static IStatus createWarningStatus(String message) {
 		return new Status(IStatus.WARNING, PLUGIN_ID, 0, message, null);
 	}
+	
+	public ScopedPreferenceStore getPreferenceStore() {
+		return preferenceStore;
+	}
 
 	private void runBSLLS() {
 		processLSP = null;
 		
 		var pathToLSP = getPathToBSLLS();
 		List<String> arguments = new ArrayList<>();
-		arguments.add("java");
+		arguments.add(Optional.of(preferenceStore.getString(BSLPreferencePage.PATH_TO_JAVA)).or("java"));
 		arguments.add("-jar");
 		arguments.add(pathToLSP.toString());
 //		arguments.add("--configuration");
@@ -104,8 +116,7 @@ public class BSLPlugin extends Plugin {
 	}
 	
 	private Path getPathToBSLLS() {
-		return Path.of(
-				"D:\\DATA\\Develop\\Project\\bsl-language-server\\build\\libs\\bsl-language-server-feature-jsonrpc-diagnostics-146b9d4-DIRTY-exec.jar");
+		return Path.of(Optional.of(preferenceStore.getString(BSLPreferencePage.PATH_TO_BSLLS)).or(""));
 	}
 
 	protected BundleContext getContext() {
