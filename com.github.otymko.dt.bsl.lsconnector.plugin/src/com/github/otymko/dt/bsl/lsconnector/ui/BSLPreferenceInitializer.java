@@ -6,14 +6,14 @@ import com.github.otymko.dt.bsl.lsconnector.BSLPlugin;
 
 public class BSLPreferenceInitializer extends AbstractPreferenceInitializer {
 
-	public BSLPreferenceInitializer() {
-		// TODO Auto-generated constructor stub
-	}
+    public BSLPreferenceInitializer() {
+	// TODO Auto-generated constructor stub
+    }
 
-	@Override
-	public void initializeDefaultPreferences() {
-		var scopedPreferenceStore = BSLPlugin.getPlugin().getPreferenceStore();
-		scopedPreferenceStore.setDefault(BSLPreferencePage.PATH_TO_JAVA, "java");
-	}
+    @Override
+    public void initializeDefaultPreferences() {
+	var scopedPreferenceStore = BSLPlugin.getPlugin().getPreferenceStore();
+	scopedPreferenceStore.setDefault(BSLPreferencePage.PATH_TO_JAVA, "java");
+    }
 
 }
