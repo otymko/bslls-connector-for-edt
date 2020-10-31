@@ -1,6 +1,6 @@
 name: CI
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -23,6 +23,7 @@ jobs:
           # назначается в сборке
           server-password: MAVEN_CENTRAL_TOKEN
 
+      # Костыль, должно быть проще?
       - name: Создание settings-security.xml
         uses: DamianReeves/write-file-action@master
         env:
@@ -35,20 +36,20 @@ jobs:
             </settingsSecurity>
           write-mode: overwrite    
 
-      - name: Cache maven repo
+      # https://docs.github.com/en/free-pro-team@latest/actions/guides/building-and-testing-java-with-maven
+      - name: Кеширование m2
         uses: actions/cache@v1
         with:
           path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-latest-${{ hashFiles('**/pom.xml') }}-${{ hashFiles('targets/latest/latest.target') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-latest-
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}-${{ hashFiles('target/default.target') }}
+          restore-keys: ${{ runner.os }}-m2
 
       # https://edt.1c.ru/dev/ru/docs/plugins/project/build-install-publish-project/
       - name: Сборка
         run: |
           Xvfb :5 -screen 0 1280x1024x8 -fbdir /tmp &
           export DISPLAY=:5
-          mvn clean verify -PSDK,find-bugs -Dtycho.localArtifacts=ignore -s settings.xml -B -V
+          mvn clean verify -PSDK,find-bugs -Dtycho.localArtifacts=ignore
         working-directory: ./build
         env:
           MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
