@@ -28,7 +28,7 @@ jobs:
         env:
           TOKEN: ${{ secrets.MAVEN_MASTER_TOKEN}}
         with:
-          path: ${{ env.home }}/.m2/settings-security.xml
+          path: /home/runner/.m2/settings-security.xml
           contents: |
             <settingsSecurity>
               <master>${{ env.TOKEN }}</master>
