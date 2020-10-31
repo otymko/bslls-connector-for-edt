@@ -21,20 +21,7 @@ jobs:
           # назначается в сборке
           server-username: MAVEN_USERNAME
           # назначается в сборке
-          server-password: MAVEN_CENTRAL_TOKEN
-
-      # Костыль, должно быть проще?
-      - name: Создание settings-security.xml
-        uses: DamianReeves/write-file-action@master
-        env:
-          TOKEN: ${{ secrets.MAVEN_MASTER_TOKEN}}
-        with:
-          path: /home/runner/.m2/settings-security.xml
-          contents: |
-            <settingsSecurity>
-              <master>${{ env.TOKEN }}</master>
-            </settingsSecurity>
-          write-mode: overwrite    
+          server-password: MAVEN_CENTRAL_TOKEN # в открытом виде в секретах 
 
       # https://docs.github.com/en/free-pro-team@latest/actions/guides/building-and-testing-java-with-maven
       - name: Кеширование m2
