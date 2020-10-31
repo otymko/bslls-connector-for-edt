@@ -24,7 +24,7 @@ jobs:
           server-password: MAVEN_CENTRAL_TOKEN
 
       - name: Создание settings-security.xml
-        uses: DamianReeves/write-file-action
+        uses: DamianReeves/write-file-action@master
         env:
           TOKEN: ${{ secrets.MAVEN_MASTER_TOKEN}}
         with:
