@@ -23,6 +23,18 @@ jobs:
           # назначается в сборке
           server-password: MAVEN_CENTRAL_TOKEN
 
+      - name: Создание settings-security.xml
+        uses: DamianReeves/write-file-action
+        env:
+          TOKEN: ${{ secrets.MAVEN_MASTER_TOKEN}}
+        with:
+          path: ${{ env.home }}/.m2/settings-security.xml
+          contents: |
+            <settingsSecurity>
+              <master>${{ env.TOKEN }}</master>
+            </settingsSecurity>
+          write-mode: overwrite    
+
       - name: Cache maven repo
         uses: actions/cache@v1
         with:
