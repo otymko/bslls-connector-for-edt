@@ -1,7 +1,5 @@
 package com.github.otymko.dt.bsl.lsconnector;
 
-import java.util.List;
-
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.ecore.EObject;
@@ -27,8 +25,12 @@ public class BSLValidator implements IExternalBslValidator {
     }
 
     @Override
-    @Check(CheckType.EXPENSIVE)
+    @Check(CheckType.NORMAL)
     public void validate(EObject object, CustomValidationMessageAcceptor messageAcceptor, CancelIndicator monitor) {
+	if (!BSLPlugin.getPlugin().isRunningLS()) {
+	    return;
+	}
+
 	if (monitor.isCanceled()) {
 	    return;
 	}
@@ -46,8 +48,8 @@ public class BSLValidator implements IExternalBslValidator {
 	BSLPlugin.getPlugin().getBSLConnector().textDocumentDidChange(uri, content);
 	BSLPlugin.getPlugin().getBSLConnector().textDocumentDidSave(uri);
 
-	List<Diagnostic> list = BSLPlugin.getPlugin().getBSLConnector().diagnostics(uri.toString());
-	list.forEach(diagnostic -> acceptIssue(module, messageAcceptor, diagnostic, document));
+	var diagnostics = BSLPlugin.getPlugin().getBSLConnector().diagnostics(uri.toString());
+	diagnostics.forEach(diagnostic -> acceptIssue(module, messageAcceptor, diagnostic, document));
     }
 
     private void acceptIssue(Module module, CustomValidationMessageAcceptor messageAcceptor, Diagnostic diagnostic,
