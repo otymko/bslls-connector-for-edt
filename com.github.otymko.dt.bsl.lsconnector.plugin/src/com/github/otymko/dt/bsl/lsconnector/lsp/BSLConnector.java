@@ -36,6 +36,7 @@ import com.github.otymko.dt.bsl.lsconnector.BSLPlugin;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 public class BSLConnector {
     private static final String LAUNCHER_NAME = "BSLLanguageLauncher";
@@ -146,10 +147,13 @@ public class BSLConnector {
     }
 
     // TODO: перевести на lsp4j
-    private List<Diagnostic> getDiagnosticFromFuture(CompletableFuture<Object> future) {
+    private List<Diagnostic> getDiagnosticFromFuture(CompletableFuture<Object> future) {	
+	JsonObject response;
 	JsonArray array = null;
+	
 	try {
-	    array = (JsonArray) future.get();
+	    response = (JsonObject) future.get();
+	    array = (JsonArray) response.get("diagnostics");
 	} catch (InterruptedException | ExecutionException e) {
 	    BSLPlugin.createErrorStatus(e.getMessage(), e);
 	}

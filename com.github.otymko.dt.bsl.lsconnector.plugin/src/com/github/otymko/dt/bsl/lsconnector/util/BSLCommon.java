@@ -88,8 +88,8 @@ public class BSLCommon {
 
     public static String getLatestReleaseURL() {
 	// FIXME: переехать на получение последнего с GitHub
-	// нужно учесть, что мининимальная допустимая версия - 0.16.0
-	return "https://github.com/1c-syntax/bsl-language-server/releases/download/v0.16.2/bsl-language-server_win.zip";
+	// нужно учесть, что мининимальная допустимая версия - 0.17.0
+	return "https://github.com/1c-syntax/bsl-language-server/releases/download/v0.17.0-RC1/bsl-language-server_win.zip";
     }
     
     private static void downloadImageApp() throws MalformedURLException, IOException {

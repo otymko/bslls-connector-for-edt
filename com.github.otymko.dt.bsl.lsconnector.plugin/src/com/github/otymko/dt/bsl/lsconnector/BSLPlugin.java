@@ -125,17 +125,10 @@ public class BSLPlugin extends Plugin {
 
     private void runBSLLS() {
 	processLSP = null;
-	var isImageApp = false;
 
 	var externalJar = preferenceStore.getBoolean(BSLPreferencePage.EXTERNAL_JAR);
-	Path pathToLSP;
-
-	if (externalJar) {
-	    pathToLSP = getPathToBSLLS();
-	} else {
-	    pathToLSP = pathToImageApp;
-	    isImageApp = true;
-	}
+	var isImageApp = !externalJar;
+	Path pathToLSP = getPathToBSLLS();
 
 	if (!pathToLSP.toFile().exists()) {
 	    return;
