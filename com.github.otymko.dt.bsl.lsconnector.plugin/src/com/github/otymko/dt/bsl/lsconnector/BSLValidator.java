@@ -1,7 +1,5 @@
 package com.github.otymko.dt.bsl.lsconnector;
 
-import java.util.List;
-
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.ecore.EObject;
@@ -9,15 +7,17 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.lsp4j.Diagnostic;
-import org.eclipse.lsp4j.Range;
+import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.validation.Check;
 import org.eclipse.xtext.validation.CheckType;
 
 import com._1c.g5.v8.dt.bsl.model.Module;
+import com._1c.g5.v8.dt.bsl.resource.BslResource;
 import com._1c.g5.v8.dt.bsl.validation.CustomValidationMessageAcceptor;
 import com._1c.g5.v8.dt.bsl.validation.IExternalBslValidator;
+import com.github.otymko.dt.bsl.lsconnector.util.BSLCommon;
 
 public class BSLValidator implements IExternalBslValidator {
 
@@ -27,47 +27,63 @@ public class BSLValidator implements IExternalBslValidator {
     }
 
     @Override
-    @Check(CheckType.EXPENSIVE)
+    @Check(CheckType.NORMAL)
     public void validate(EObject object, CustomValidationMessageAcceptor messageAcceptor, CancelIndicator monitor) {
 	if (monitor.isCanceled()) {
+	    return;
+	}
+
+	var resource = (BslResource) ((Module) object).eResource();
+	if (!resource.isDeepAnalysing()) {
+	    return;
+	}
+
+	if (!BSLPlugin.getPlugin().isRunningLS()) {
 	    return;
 	}
 
 	var module = (Module) object;
 	var node = NodeModelUtils.findActualNodeFor(module);
 	var content = node.getText();
+	if (content == null) {
+	    content = "";
+	}
 	var document = new Document(content);
 	var moduleFile = ResourcesPlugin.getWorkspace().getRoot()
 		.getFile(new Path(EcoreUtil.getURI(module).toPlatformString(true)));
 	var uri = moduleFile.getLocationURI();
 
-	// TODO: нужно ли открывать каждый раз ?
-	BSLPlugin.getPlugin().getBSLConnector().textDocumentDidOpen(uri, content);
+	// Костыль при открытии, если на форме нет фокуса
+	if (BSLPlugin.getPlugin().getWorkbenchParts().get(uri.toString()) == null) {
+	    BSLPlugin.getPlugin().getBSLConnector().textDocumentDidOpen(uri, content);
+	}
 	BSLPlugin.getPlugin().getBSLConnector().textDocumentDidChange(uri, content);
-	BSLPlugin.getPlugin().getBSLConnector().textDocumentDidSave(uri);
 
-	List<Diagnostic> list = BSLPlugin.getPlugin().getBSLConnector().diagnostics(uri.toString());
-	list.forEach(diagnostic -> acceptIssue(module, messageAcceptor, diagnostic, document));
+	var diagnostics = BSLPlugin.getPlugin().getBSLConnector().diagnostics(uri.toString());
+	diagnostics.forEach(diagnostic -> acceptIssue(module, messageAcceptor, diagnostic, document));
     }
 
     private void acceptIssue(Module module, CustomValidationMessageAcceptor messageAcceptor, Diagnostic diagnostic,
 	    Document document) {
 	int[] offsetParams;
 	try {
-	    offsetParams = getOffsetByRange(diagnostic.getRange(), document);
+	    offsetParams = BSLCommon.getOffsetByRange(diagnostic.getRange(), document);
 	} catch (BadLocationException e) {
 	    BSLPlugin.createErrorStatus(e.getMessage(), e);
 	    return;
 	}
-	messageAcceptor.acceptError(diagnostic.getMessage(), module, offsetParams[0], offsetParams[1],
-		diagnostic.getCode());
-    }
+	var severity = diagnostic.getSeverity();
+	if (severity == DiagnosticSeverity.Error) {
+	    messageAcceptor.acceptError(diagnostic.getMessage(), module, offsetParams[0], offsetParams[1],
+		    diagnostic.getCode());
+	} else if (severity == DiagnosticSeverity.Warning) {
+	    messageAcceptor.acceptWarning(diagnostic.getMessage(), module, offsetParams[0], offsetParams[1],
+		    diagnostic.getCode());
+	} else {
+	    messageAcceptor.acceptInfo(diagnostic.getMessage(), module, offsetParams[0], offsetParams[1],
+		    diagnostic.getCode());
+	}
 
-    private int[] getOffsetByRange(Range range, Document document) throws BadLocationException {
-	int offset, lenght = 0;
-	offset = document.getLineOffset(range.getStart().getLine()) + range.getStart().getCharacter();
-	lenght = document.getLineOffset(range.getEnd().getLine()) + range.getEnd().getCharacter() - offset;
-	return new int[] { offset, lenght };
     }
 
 }
