@@ -7,6 +7,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.validation.Check;
@@ -71,8 +72,18 @@ public class BSLValidator implements IExternalBslValidator {
 	    BSLPlugin.createErrorStatus(e.getMessage(), e);
 	    return;
 	}
-	messageAcceptor.acceptError(diagnostic.getMessage(), module, offsetParams[0], offsetParams[1],
-		diagnostic.getCode());
+	var severity = diagnostic.getSeverity();
+	if (severity == DiagnosticSeverity.Error) {
+	    messageAcceptor.acceptError(diagnostic.getMessage(), module, offsetParams[0], offsetParams[1],
+		    diagnostic.getCode());
+	} else if (severity == DiagnosticSeverity.Warning) {
+	    messageAcceptor.acceptWarning(diagnostic.getMessage(), module, offsetParams[0], offsetParams[1],
+		    diagnostic.getCode());
+	} else {
+	    messageAcceptor.acceptInfo(diagnostic.getMessage(), module, offsetParams[0], offsetParams[1],
+		    diagnostic.getCode());
+	}
+
     }
 
 }
