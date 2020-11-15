@@ -244,7 +244,6 @@ public class BSLPlugin extends Plugin {
 	bslConnector.startInThread();
 	sleepCurrentThread(2000); // FIXME: Сколько нужно ждать?
 	bslConnector.initialize();
-	bslConnector.textDocumentDidOpen(BSLCommon.FAKE_URI, "");
     }
 
     private void stopLS() {
