@@ -7,10 +7,10 @@
 	<parent>
 		<groupId>com.github.otymko.dt.bsl.lsconnector</groupId>
 		<artifactId>build</artifactId>
-		<version>0.1.0-SNAPSHOT</version>
+		<version>0.2.0-SNAPSHOT</version>
 		<relativePath>../build/pom.xml</relativePath>
 	</parent>
 	<packaging>eclipse-plugin</packaging>
 	<artifactId>com.github.otymko.dt.bsl.lspconnector</artifactId>
-	<version>0.1.0-SNAPSHOT</version>
+	<version>0.2.0-SNAPSHOT</version>
 </project>
