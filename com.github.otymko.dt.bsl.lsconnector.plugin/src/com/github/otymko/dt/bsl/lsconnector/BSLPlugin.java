@@ -9,9 +9,13 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
@@ -46,14 +50,14 @@ public class BSLPlugin extends Plugin {
 	plugin = this;
 	super.start(bundleContext);
 	BSLPlugin.context = bundleContext;
+
 	atStart();
-	sleepCurrentThread(1000); // в плагине sonarlint так
-	if (PlatformUI.isWorkbenchRunning()) {
-	    PlatformUI.getWorkbench().addWindowListener(WINDOWS_EVENT_LISTENER);
-	    for (var window : PlatformUI.getWorkbench().getWorkbenchWindows()) {
-		WindowEventListener.addListenerToAllPages(window);
-	    }
-	}
+
+	checkBSlLS();
+	runBSLLS();
+	bindingLSP();
+
+	startWindowsListener();
     }
 
     public void stop(BundleContext bundleContext) throws Exception {
@@ -102,7 +106,7 @@ public class BSLPlugin extends Plugin {
     public boolean isRunningLS() {
 	var result = true;
 	if (bslConnector == null) {
-	    result = false;   
+	    result = false;
 	} else {
 	    result = processLSP != null && processLSP.isAlive();
 	}
@@ -124,17 +128,25 @@ public class BSLPlugin extends Plugin {
     public ScopedPreferenceStore getPreferenceStore() {
 	return preferenceStore;
     }
-    
+
     public Map<String, IWorkbenchPart> getWorkbenchParts() {
 	return workbenchParts;
+    }
+
+    private void startWindowsListener() {
+	sleepCurrentThread(1000); // в плагине sonarlint так
+	if (PlatformUI.isWorkbenchRunning()) {
+	    PlatformUI.getWorkbench().addWindowListener(WINDOWS_EVENT_LISTENER);
+	    for (var window : PlatformUI.getWorkbench().getWorkbenchWindows()) {
+		WindowEventListener.addListenerToAllPages(window);
+	    }
+	}
     }
 
     private void atStart() {
 	initAppDir();
 	initPreferenceStore();
 	prepareForStart();
-	runBSLLS();
-	bindingLSP();
     }
 
     private void initPreferenceStore() {
@@ -151,6 +163,39 @@ public class BSLPlugin extends Plugin {
 	    // TODO Auto-generated catch block
 	    e.printStackTrace();
 	}
+    }
+
+    private void checkBSlLS() {
+	if (pathToImageApp.toFile().exists()) {
+	    return;
+	}
+
+	// проверяем на повторный запуск
+	var jobName = "Загрузка BSL LS с GitHub";
+	var jobs = Job.getJobManager().find(jobName);
+	if (jobs.length > 0) {
+	    return;
+	}
+
+	var job = new Job(jobName) {
+	    @Override
+	    protected IStatus run(IProgressMonitor monitor) {
+		BSLCommon.runDownloadImageApp();
+		if (pathToImageApp.toFile().exists()) {
+		    return Status.OK_STATUS;
+		}
+		return Status.CANCEL_STATUS;
+	    }
+	};
+	job.addJobChangeListener(new JobChangeAdapter() {
+	    @Override
+	    public void done(IJobChangeEvent event) {
+		if (event.getResult().isOK()) {
+		    restartLS();
+		}
+	    }
+	});
+	job.schedule();
     }
 
     private void runBSLLS() {
@@ -170,12 +215,12 @@ public class BSLPlugin extends Plugin {
 	    arguments.add("-jar");
 	}
 	arguments.add("\"" + pathToLSP.toString() + "\"");
-	
+
 	if (pathToConfiguration.isPresent()) {
 	    arguments.add("--configuration");
 	    arguments.add(pathToConfiguration.get().toString());
 	}
-	
+
 	createWarningStatus(arguments.toString());
 
 	try {

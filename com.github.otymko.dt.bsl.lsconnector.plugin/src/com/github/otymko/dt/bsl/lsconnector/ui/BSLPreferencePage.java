@@ -8,7 +8,6 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import com.github.otymko.dt.bsl.lsconnector.BSLPlugin;
-import com.github.otymko.dt.bsl.lsconnector.util.BSLCommon;
 
 public class BSLPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
     public static final String PATH_TO_BSLLS = "PATH_TO_BSLLS";
@@ -21,22 +20,19 @@ public class BSLPreferencePage extends FieldEditorPreferencePage implements IWor
 
     @Override
     public void init(IWorkbench workbench) {
-	if (BSLPlugin.getPlugin().getPathToImageApp().toFile().exists()) {
-	    return;
-	}
-	BSLCommon.runDownloadImageApp();
+	// none
     }
 
     @Override
     protected void createFieldEditors() {
 	var parent = getFieldEditorParent();
-	
+
 	var pathToJava = new StringFieldEditor(PATH_TO_JAVA, "Путь к JAVA", parent);
 	addField(pathToJava);
-	
+
 	var pathToBSLLS = new FileFieldEditor(PATH_TO_BSLLS, "Путь к BSL LS", parent);
 	addField(pathToBSLLS);
-	
+
 	var externalJar = new BooleanFieldEditor(EXTERNAL_JAR, "Использовать внешний JAR", parent);
 	addField(externalJar);
     }
@@ -46,5 +42,5 @@ public class BSLPreferencePage extends FieldEditorPreferencePage implements IWor
 	super.performApply();
 	BSLPlugin.getPlugin().restartLS();
     }
-    
+
 }

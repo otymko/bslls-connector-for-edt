@@ -15,11 +15,7 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.FileUtils;
-import org.eclipse.core.runtime.ICoreRunnable;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.lsp4j.Range;
@@ -33,22 +29,11 @@ public class BSLCommon {
     private static final int DEFAULT_TIMEOUT = 300;
 
     public static void runDownloadImageApp() {
-	var job = Job.create("Загрузка BSL LS", (ICoreRunnable) monitor -> {
-	    try {
-		downloadImageApp();
-	    } catch (IOException e) {
-		BSLPlugin.createErrorStatus(e.getMessage(), e);
-	    }
-	});
-	job.addJobChangeListener(new JobChangeAdapter() {
-	    @Override
-	    public void done(IJobChangeEvent event) {
-		if (event.getResult().isOK()) {
-		    BSLPlugin.getPlugin().restartLS();
-		}
-	    }
-	});
-	job.schedule();
+	try {
+	    downloadImageApp();
+	} catch (IOException e) {
+	    BSLPlugin.createErrorStatus(e.getMessage(), e);
+	}
     }
 
     public static void downloadLS(File file, String urlRelease) throws MalformedURLException, IOException {
@@ -89,7 +74,7 @@ public class BSLCommon {
 	}
 	return Optional.empty();
     }
-    
+
     public static int[] getOffsetByRange(Range range, Document document) throws BadLocationException {
 	int offset, lenght = 0;
 	offset = document.getLineOffset(range.getStart().getLine()) + range.getStart().getCharacter();
