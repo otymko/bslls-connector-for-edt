@@ -15,15 +15,13 @@ public class BSLPreferencePage extends FieldEditorPreferencePage implements IWor
     public static final String EXTERNAL_JAR = "EXTERNAL_JAR";
     public static final String PATH_TO_JAVA = "PATH_TO_JAVA";
 
-    private static final BSLPlugin plugin = BSLPlugin.getPlugin();
-
     public BSLPreferencePage() {
-	setPreferenceStore(plugin.getPreferenceStore());
+	setPreferenceStore(BSLPlugin.getPlugin().getPreferenceStore());
     }
 
     @Override
     public void init(IWorkbench workbench) {
-	if (plugin.getPathToImageApp().toFile().exists()) {
+	if (BSLPlugin.getPlugin().getPathToImageApp().toFile().exists()) {
 	    return;
 	}
 	BSLCommon.runDownloadImageApp();
@@ -46,7 +44,7 @@ public class BSLPreferencePage extends FieldEditorPreferencePage implements IWor
     @Override
     protected void performApply() {
 	super.performApply();
-	plugin.restartLS();
+	BSLPlugin.getPlugin().restartLS();
     }
     
 }

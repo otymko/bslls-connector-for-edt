@@ -19,6 +19,7 @@ import org.eclipse.lsp4j.CodeActionKindCapabilities;
 import org.eclipse.lsp4j.CodeActionLiteralSupportCapabilities;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
+import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
 import org.eclipse.lsp4j.DidSaveTextDocumentParams;
 import org.eclipse.lsp4j.InitializeParams;
@@ -113,7 +114,7 @@ public class BSLConnector {
 	var params = new DidChangeTextDocumentParams();
 	VersionedTextDocumentIdentifier versionedTextDocumentIdentifier = new VersionedTextDocumentIdentifier();
 	versionedTextDocumentIdentifier.setUri(uri.toString());
-	versionedTextDocumentIdentifier.setVersion(1);
+	versionedTextDocumentIdentifier.setVersion(0);
 	params.setTextDocument(versionedTextDocumentIdentifier);
 	var textDocument = new TextDocumentContentChangeEvent();
 	textDocument.setText(text);
@@ -121,6 +122,13 @@ public class BSLConnector {
 	list.add(textDocument);
 	params.setContentChanges(list);
 	server.getTextDocumentService().didChange(params);
+    }
+    
+    public void textDocumentDidClose(URI uri) {
+	var params = new DidCloseTextDocumentParams();
+	var textDocument = new TextDocumentIdentifier(uri.toString());
+	params.setTextDocument(textDocument);
+	server.getTextDocumentService().didClose(params);
     }
 
     public List<Diagnostic> diagnostics(String uri) {

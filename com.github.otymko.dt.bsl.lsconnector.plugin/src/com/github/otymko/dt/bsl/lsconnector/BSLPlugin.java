@@ -4,16 +4,21 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.osgi.framework.BundleContext;
 
+import com.github.otymko.dt.bsl.lsconnector.listener.WindowEventListener;
 import com.github.otymko.dt.bsl.lsconnector.lsp.BSLConnector;
 import com.github.otymko.dt.bsl.lsconnector.lsp.BSLLanguageClient;
 import com.github.otymko.dt.bsl.lsconnector.ui.BSLPreferencePage;
@@ -29,6 +34,9 @@ public class BSLPlugin extends Plugin {
     private Path pathToImageApp;
     private Optional<Path> pathToConfiguration;
     private ScopedPreferenceStore preferenceStore;
+    private static final WindowEventListener WINDOWS_EVENT_LISTENER = new WindowEventListener();
+
+    private static Map<String, IWorkbenchPart> workbenchParts = new ConcurrentHashMap<>();
 
     public static BSLPlugin getPlugin() {
 	return plugin;
@@ -39,14 +47,28 @@ public class BSLPlugin extends Plugin {
 	super.start(bundleContext);
 	BSLPlugin.context = bundleContext;
 	atStart();
+	sleepCurrentThread(1000); // в плагине sonarlint так
+	if (PlatformUI.isWorkbenchRunning()) {
+	    PlatformUI.getWorkbench().addWindowListener(WINDOWS_EVENT_LISTENER);
+	    for (var window : PlatformUI.getWorkbench().getWorkbenchWindows()) {
+		WindowEventListener.addListenerToAllPages(window);
+	    }
+	}
     }
 
     public void stop(BundleContext bundleContext) throws Exception {
 	stopLS();
 	plugin = null;
+
+	if (PlatformUI.isWorkbenchRunning()) {
+	    for (var window : PlatformUI.getWorkbench().getWorkbenchWindows()) {
+		WindowEventListener.removeListenerFromAllPages(window);
+	    }
+	}
+
 	super.stop(bundleContext);
     }
-    
+
     protected BundleContext getContext() {
 	return context;
     }
@@ -55,7 +77,7 @@ public class BSLPlugin extends Plugin {
 	try {
 	    Thread.sleep(value);
 	} catch (Exception e) {
-	    BSLPlugin.createWarningStatus(e.getMessage());
+	    createWarningStatus(e.getMessage());
 	}
     }
 
@@ -78,31 +100,39 @@ public class BSLPlugin extends Plugin {
     }
 
     public boolean isRunningLS() {
-	return bslConnector != null;
+	var result = true;
+	if (bslConnector == null) {
+	    result = false;   
+	} else {
+	    result = processLSP != null && processLSP.isAlive();
+	}
+	return result;
     }
-    
+
     public BSLConnector getBSLConnector() {
 	return bslConnector;
     }
-    
+
     public Path getAppDir() {
 	return appDir;
     }
-    
+
     public Path getPathToImageApp() {
 	return pathToImageApp;
     }
-    
+
     public ScopedPreferenceStore getPreferenceStore() {
 	return preferenceStore;
     }
     
+    public Map<String, IWorkbenchPart> getWorkbenchParts() {
+	return workbenchParts;
+    }
+
     private void atStart() {
 	initAppDir();
-	initPreferenceStore();	
-
+	initPreferenceStore();
 	prepareForStart();
-	
 	runBSLLS();
 	bindingLSP();
     }
@@ -139,11 +169,14 @@ public class BSLPlugin extends Plugin {
 	    arguments.add(preferenceStore.getString(BSLPreferencePage.PATH_TO_JAVA));
 	    arguments.add("-jar");
 	}
-	arguments.add(pathToLSP.toString());
+	arguments.add("\"" + pathToLSP.toString() + "\"");
+	
 	if (pathToConfiguration.isPresent()) {
 	    arguments.add("--configuration");
 	    arguments.add(pathToConfiguration.get().toString());
 	}
+	
+	createWarningStatus(arguments.toString());
 
 	try {
 	    processLSP = new ProcessBuilder().command(arguments).start();

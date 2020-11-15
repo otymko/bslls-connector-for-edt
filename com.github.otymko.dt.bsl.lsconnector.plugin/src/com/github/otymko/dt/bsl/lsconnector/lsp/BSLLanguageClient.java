@@ -12,14 +12,17 @@ public class BSLLanguageClient implements LanguageClient {
 
     @Override
     public void telemetryEvent(Object object) {
+	// none
     }
 
     @Override
     public void publishDiagnostics(PublishDiagnosticsParams diagnostics) {
+	// none
     }
 
     @Override
     public void showMessage(MessageParams messageParams) {
+	// none
     }
 
     @Override
@@ -29,6 +32,7 @@ public class BSLLanguageClient implements LanguageClient {
 
     @Override
     public void logMessage(MessageParams message) {
+	// none
     }
 
 }
