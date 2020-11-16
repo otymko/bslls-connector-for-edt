@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<site>
-   <feature url="features/com.github.otymko.dt.bsl.lsconnector.plugin_0.1.0.qualifier.jar" id="com.github.otymko.dt.bsl.lsconnector" version="0.1.0.qualifier">
-      <category name="com.github.otymko.dt.bsl.lsconnector.plugin.category.public"/>
-   </feature>
-   <category-def name="com.github.otymko.dt.bsl.lsconnector.plugin.category.public" label="1C: Enterprise Development Tools Plugin"/>
-</site>
