@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.FileUtils;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.lsp4j.Range;
@@ -66,8 +65,8 @@ public class BSLCommon {
 	zipIn.close();
     }
 
-    public static Optional<Path> getConfigurationFileFromWorkspace(IPath pathToWorkspace) throws IOException {
-	var listFiles = Files.walk(Path.of(pathToWorkspace.toFile().toURI())).filter(Files::isRegularFile)
+    public static Optional<Path> getConfigurationFileFromWorkspace(Path pathToWorkspace) throws IOException {
+	var listFiles = Files.walk(pathToWorkspace).filter(Files::isRegularFile)
 		.filter(path -> path.endsWith(".bsl-language-server.json")).collect(Collectors.toList());
 	if (!listFiles.isEmpty()) {
 	    return Optional.of(listFiles.get(0));
@@ -98,6 +97,28 @@ public class BSLCommon {
 	// FIXME: переехать на получение последнего с GitHub
 	// нужно учесть, что мининимальная допустимая версия - 0.17.0
 	return "https://github.com/1c-syntax/bsl-language-server/releases/download/v0.17.0-RC1/bsl-language-server_win.zip";
+    }
+
+    // FIXME: временно взято из https://github.com/1c-syntax/utils
+    public static URI uri(URI uri) {
+	var decodedUri = URI.create(uri.getScheme() + ":" + uri.getSchemeSpecificPart().replace(" ", "%20"));
+
+	if ("file".equals(decodedUri.getScheme()) && decodedUri.getAuthority() == null) {
+	    return path(new File(decodedUri)).toUri();
+	}
+
+	return decodedUri;
+    }
+
+    // FIXME: временно взято из https://github.com/1c-syntax/utils
+    private static Path path(File file) {
+	try {
+	    return file.getCanonicalFile().toPath().toAbsolutePath();
+	} catch (IOException e) {
+	    BSLPlugin.createErrorStatus(e.getMessage(), e);
+	}
+	return null;
+
     }
 
     private static void downloadImageApp() throws MalformedURLException, IOException {

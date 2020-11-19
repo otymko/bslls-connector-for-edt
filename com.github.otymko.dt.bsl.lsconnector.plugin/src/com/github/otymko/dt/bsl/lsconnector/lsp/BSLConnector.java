@@ -34,6 +34,7 @@ import org.eclipse.lsp4j.launch.LSPLauncher;
 import org.eclipse.lsp4j.services.LanguageServer;
 
 import com.github.otymko.dt.bsl.lsconnector.BSLPlugin;
+import com.github.otymko.dt.bsl.lsconnector.util.BSLCommon;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -67,9 +68,12 @@ public class BSLConnector {
     }
 
     public CompletableFuture<InitializeResult> initialize() {
+	var rootUri = BSLCommon.uri(BSLPlugin.getPlugin().getPathToWorkspace().toUri());
+	
 	var params = new InitializeParams();
 	params.setProcessId((int) ProcessHandle.current().pid());
 	params.setTrace("verbose"); // TODO:вынести в константы
+	params.setRootUri(rootUri.toString());
 
 	ClientCapabilities serverCapabilities = new ClientCapabilities();
 	TextDocumentClientCapabilities textDocument = new TextDocumentClientCapabilities();
