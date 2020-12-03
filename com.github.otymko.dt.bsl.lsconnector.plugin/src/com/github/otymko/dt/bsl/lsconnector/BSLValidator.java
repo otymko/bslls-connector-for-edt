@@ -27,7 +27,7 @@ public class BSLValidator implements IExternalBslValidator {
     }
 
     @Override
-    @Check(CheckType.NORMAL)
+    @Check(CheckType.EXPENSIVE)
     public void validate(EObject object, CustomValidationMessageAcceptor messageAcceptor, CancelIndicator monitor) {
 	if (monitor.isCanceled()) {
 	    return;
@@ -51,13 +51,16 @@ public class BSLValidator implements IExternalBslValidator {
 	var document = new Document(content);
 	var moduleFile = ResourcesPlugin.getWorkspace().getRoot()
 		.getFile(new Path(EcoreUtil.getURI(module).toPlatformString(true)));
-	var uri = moduleFile.getLocationURI();
+	var uri = BSLCommon.uri(moduleFile.getLocationURI());
 
 	// Костыль при открытии, если на форме нет фокуса
 	if (BSLPlugin.getPlugin().getWorkbenchParts().get(uri.toString()) == null) {
 	    BSLPlugin.getPlugin().getBSLConnector().textDocumentDidOpen(uri, content);
-	}
-	BSLPlugin.getPlugin().getBSLConnector().textDocumentDidChange(uri, content);
+	} else {
+	    BSLPlugin.getPlugin().getBSLConnector().textDocumentDidChange(uri, content);    
+	}	
+	// FIXME: иначе может быть NPE
+	BSLPlugin.getPlugin().sleepCurrentThread(1000);
 
 	var diagnostics = BSLPlugin.getPlugin().getBSLConnector().diagnostics(uri.toString());
 	diagnostics.forEach(diagnostic -> acceptIssue(module, messageAcceptor, diagnostic, document));

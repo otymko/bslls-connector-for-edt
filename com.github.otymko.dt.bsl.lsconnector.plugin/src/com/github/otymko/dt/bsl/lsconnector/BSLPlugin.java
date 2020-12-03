@@ -36,6 +36,7 @@ public class BSLPlugin extends Plugin {
     private BSLConnector bslConnector;
     private Path appDir;
     private Path pathToImageApp;
+    private Path pathToWorkspace;
     private Optional<Path> pathToConfiguration;
     private ScopedPreferenceStore preferenceStore;
     private static final WindowEventListener WINDOWS_EVENT_LISTENER = new WindowEventListener();
@@ -132,6 +133,10 @@ public class BSLPlugin extends Plugin {
     public Map<String, IWorkbenchPart> getWorkbenchParts() {
 	return workbenchParts;
     }
+    
+    public Path getPathToWorkspace() {
+	return pathToWorkspace;
+    }
 
     private void startWindowsListener() {
 	sleepCurrentThread(1000); // в плагине sonarlint так
@@ -157,11 +162,12 @@ public class BSLPlugin extends Plugin {
     }
 
     private void prepareForStart() {
+	pathToWorkspace = ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile().toPath();
+	
 	try {
 	    searchConfigurationFile();
 	} catch (IOException e) {
-	    // TODO Auto-generated catch block
-	    e.printStackTrace();
+	    createErrorStatus(e.getMessage(), e);
 	}
     }
 
@@ -224,7 +230,10 @@ public class BSLPlugin extends Plugin {
 	createWarningStatus(arguments.toString());
 
 	try {
-	    processLSP = new ProcessBuilder().command(arguments).start();
+	    processLSP = new ProcessBuilder()
+		    .command(arguments)
+		    .directory(pathToWorkspace.toFile())
+		    .start();
 	    sleepCurrentThread(500);
 	    if (!processLSP.isAlive()) {
 		BSLPlugin
@@ -258,7 +267,6 @@ public class BSLPlugin extends Plugin {
     }
 
     private void searchConfigurationFile() throws IOException {
-	var pathToWorkspace = ResourcesPlugin.getWorkspace().getRoot().getLocation();
 	pathToConfiguration = BSLCommon.getConfigurationFileFromWorkspace(pathToWorkspace);
     }
 
