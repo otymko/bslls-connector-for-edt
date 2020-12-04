@@ -151,10 +151,6 @@ public class BSLPlugin extends Plugin {
 	pathToImageApp = Path.of(pathToApp.toString(), "bsl-language-server.exe");
     }
 
-    public BSLConnector getBSLConnector() {
-	return lsService.getConnector();
-    }
-
     public Path getAppDir() {
 	return appDir;
     }
@@ -181,6 +177,10 @@ public class BSLPlugin extends Plugin {
 
     public Optional<Path> getPathToConfiguration() {
 	return pathToConfiguration;
+    }
+    
+    public LSService getLSService() {
+	return lsService;
     }
 
     protected BundleContext getContext() {

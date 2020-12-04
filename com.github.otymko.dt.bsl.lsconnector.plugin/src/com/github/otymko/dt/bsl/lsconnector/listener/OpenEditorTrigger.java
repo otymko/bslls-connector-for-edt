@@ -11,7 +11,8 @@ public class OpenEditorTrigger implements IPartListener2 {
 
     @Override
     public void partActivated(IWorkbenchPartReference partRef) {
-	if (BSLPlugin.getPlugin().isRunningLS()) {
+	var plugin = BSLPlugin.getPlugin();
+	if (plugin.isRunningLS()) {
 	    return;
 	}
 
@@ -20,7 +21,7 @@ public class OpenEditorTrigger implements IPartListener2 {
 	    var editorPart = (BslXtextEditor) part;
 	    var uri = BSLCommon.uri(editorPart.getResource().getLocationURI());
 
-	    if (BSLPlugin.getPlugin().getWorkbenchParts().get(uri.toString()) == null) {
+	    if (plugin.getWorkbenchParts().get(uri.toString()) == null) {
 		partOpened(partRef);
 	    }
 	}
@@ -36,8 +37,9 @@ public class OpenEditorTrigger implements IPartListener2 {
 	if (part instanceof BslXtextEditor) {
 	    var editorPart = (BslXtextEditor) part;
 	    var uri = BSLCommon.uri(editorPart.getResource().getLocationURI());
-	    BSLPlugin.getPlugin().getWorkbenchParts().remove(uri.toString());
-	    BSLPlugin.getPlugin().getBSLConnector().textDocumentDidClose(uri);
+	    var plugin = BSLPlugin.getPlugin();
+	    plugin.getWorkbenchParts().remove(uri.toString());
+	    plugin.getLSService().getConnector().textDocumentDidClose(uri);
 	}
     }
 
@@ -51,8 +53,9 @@ public class OpenEditorTrigger implements IPartListener2 {
 	    var editorPart = (BslXtextEditor) part;
 	    var uri = BSLCommon.uri(editorPart.getResource().getLocationURI());
 	    var content = BSLCommon.getContentFromXtextEditor(editorPart);
-	    BSLPlugin.getPlugin().getWorkbenchParts().put(uri.toString(), part);
-	    BSLPlugin.getPlugin().getBSLConnector().textDocumentDidOpen(uri, content);
+	    var plugin = BSLPlugin.getPlugin();
+	    plugin.getWorkbenchParts().put(uri.toString(), part);
+	    plugin.getLSService().getConnector().textDocumentDidOpen(uri, content);
 	}
     }
 
