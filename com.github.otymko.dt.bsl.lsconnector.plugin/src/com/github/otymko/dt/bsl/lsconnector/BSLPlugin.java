@@ -159,6 +159,7 @@ public class BSLPlugin extends Plugin {
 	preferenceStore.setDefault(BSLPreferencePage.PATH_TO_BSLLS, plugin.getPathToImageApp().toString());
 	preferenceStore.setDefault(BSLPreferencePage.EXTERNAL_JAR, false);
 	preferenceStore.setDefault(BSLPreferencePage.PATH_TO_JAVA, "java");
+	preferenceStore.setDefault(BSLPreferencePage.JAVA_OPTS, "");
     }
 
     private void prepareForStart() {
@@ -217,7 +218,11 @@ public class BSLPlugin extends Plugin {
 
 	List<String> arguments = new ArrayList<>();
 	if (!isImageApp) {
+	    var javaOpts = preferenceStore.getString(BSLPreferencePage.JAVA_OPTS);
 	    arguments.add(preferenceStore.getString(BSLPreferencePage.PATH_TO_JAVA));
+	    if (!javaOpts.isEmpty()) {
+		arguments.add(javaOpts);
+	    }
 	    arguments.add("-jar");
 	}
 	arguments.add("\"" + pathToLSP.toString() + "\"");

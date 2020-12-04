@@ -13,6 +13,7 @@ public class BSLPreferencePage extends FieldEditorPreferencePage implements IWor
     public static final String PATH_TO_BSLLS = "PATH_TO_BSLLS";
     public static final String EXTERNAL_JAR = "EXTERNAL_JAR";
     public static final String PATH_TO_JAVA = "PATH_TO_JAVA";
+    public static final String JAVA_OPTS = "JAVA_OPTS";
 
     public BSLPreferencePage() {
 	setPreferenceStore(BSLPlugin.getPlugin().getPreferenceStore());
@@ -35,6 +36,9 @@ public class BSLPreferencePage extends FieldEditorPreferencePage implements IWor
 
 	var externalJar = new BooleanFieldEditor(EXTERNAL_JAR, "Использовать внешний JAR", parent);
 	addField(externalJar);
+	
+	var javaOpts = new StringFieldEditor(JAVA_OPTS, "Java Opts", parent);
+	addField(javaOpts);
     }
 
     @Override
