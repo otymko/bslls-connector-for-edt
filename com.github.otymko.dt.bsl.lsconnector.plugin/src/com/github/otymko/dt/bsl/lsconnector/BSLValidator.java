@@ -29,6 +29,7 @@ public class BSLValidator implements IExternalBslValidator {
     @Override
     @Check(CheckType.EXPENSIVE)
     public void validate(EObject object, CustomValidationMessageAcceptor messageAcceptor, CancelIndicator monitor) {
+	// попытка прервать
 	if (monitor.isCanceled()) {
 	    return;
 	}
@@ -57,13 +58,30 @@ public class BSLValidator implements IExternalBslValidator {
 	if (BSLPlugin.getPlugin().getWorkbenchParts().get(uri.toString()) == null) {
 	    BSLPlugin.getPlugin().getBSLConnector().textDocumentDidOpen(uri, content);
 	} else {
-	    BSLPlugin.getPlugin().getBSLConnector().textDocumentDidChange(uri, content);    
-	}	
+	    BSLPlugin.getPlugin().getBSLConnector().textDocumentDidChange(uri, content);
+	}
+
 	// FIXME: иначе может быть NPE
 	BSLPlugin.getPlugin().sleepCurrentThread(1000);
+	// попытка прервать
+	if (monitor.isCanceled()) {
+	    return;
+	}
 
 	var diagnostics = BSLPlugin.getPlugin().getBSLConnector().diagnostics(uri.toString());
-	diagnostics.forEach(diagnostic -> acceptIssue(module, messageAcceptor, diagnostic, document));
+
+	// попытка прервать
+	if (monitor.isCanceled()) {
+	    return;
+	}
+
+	diagnostics.forEach(diagnostic -> {
+	    // попытка прервать
+	    if (monitor.isCanceled()) {
+		return;
+	    }
+	    acceptIssue(module, messageAcceptor, diagnostic, document);
+	});
     }
 
     private void acceptIssue(Module module, CustomValidationMessageAcceptor messageAcceptor, Diagnostic diagnostic,
@@ -76,14 +94,15 @@ public class BSLValidator implements IExternalBslValidator {
 	    return;
 	}
 	var severity = diagnostic.getSeverity();
+	var message = "[BSL LS] " + diagnostic.getMessage(); 
 	if (severity == DiagnosticSeverity.Error) {
-	    messageAcceptor.acceptError(diagnostic.getMessage(), module, offsetParams[0], offsetParams[1],
+	    messageAcceptor.acceptError(message, module, offsetParams[0], offsetParams[1],
 		    diagnostic.getCode());
 	} else if (severity == DiagnosticSeverity.Warning) {
-	    messageAcceptor.acceptWarning(diagnostic.getMessage(), module, offsetParams[0], offsetParams[1],
+	    messageAcceptor.acceptWarning(message, module, offsetParams[0], offsetParams[1],
 		    diagnostic.getCode());
 	} else {
-	    messageAcceptor.acceptInfo(diagnostic.getMessage(), module, offsetParams[0], offsetParams[1],
+	    messageAcceptor.acceptInfo(message, module, offsetParams[0], offsetParams[1],
 		    diagnostic.getCode());
 	}
 
