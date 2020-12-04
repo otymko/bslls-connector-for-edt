@@ -1,0 +1,4 @@
+#Fri Dec 04 20:15:18 KRAT 2020
+artifact.repository.factory.order=artifacts.xml.xz,artifacts.xml,\!
+version=1
+metadata.repository.factory.order=content.xml.xz,content.xml,\!
