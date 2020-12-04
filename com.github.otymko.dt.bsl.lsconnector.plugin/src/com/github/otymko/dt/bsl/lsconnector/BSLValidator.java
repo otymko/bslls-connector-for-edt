@@ -94,14 +94,15 @@ public class BSLValidator implements IExternalBslValidator {
 	    return;
 	}
 	var severity = diagnostic.getSeverity();
+	var message = "[BSL LS] " + diagnostic.getMessage(); 
 	if (severity == DiagnosticSeverity.Error) {
-	    messageAcceptor.acceptError(diagnostic.getMessage(), module, offsetParams[0], offsetParams[1],
+	    messageAcceptor.acceptError(message, module, offsetParams[0], offsetParams[1],
 		    diagnostic.getCode());
 	} else if (severity == DiagnosticSeverity.Warning) {
-	    messageAcceptor.acceptWarning(diagnostic.getMessage(), module, offsetParams[0], offsetParams[1],
+	    messageAcceptor.acceptWarning(message, module, offsetParams[0], offsetParams[1],
 		    diagnostic.getCode());
 	} else {
-	    messageAcceptor.acceptInfo(diagnostic.getMessage(), module, offsetParams[0], offsetParams[1],
+	    messageAcceptor.acceptInfo(message, module, offsetParams[0], offsetParams[1],
 		    diagnostic.getCode());
 	}
 
