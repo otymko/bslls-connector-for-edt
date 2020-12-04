@@ -15,6 +15,12 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.lsp4j.Range;
@@ -27,6 +33,39 @@ public class BSLCommon {
     private static final int BUFFER_SIZE = 4096;
     private static final int DEFAULT_TIMEOUT = 300;
 
+    public static void downloadBSLLS(Path pathToImageApp) {
+	if (pathToImageApp.toFile().exists()) {
+	    return;
+	}
+
+	// проверяем на повторный запуск
+	var jobName = "Загрузка BSL LS с GitHub";
+	var jobs = Job.getJobManager().find(jobName);
+	if (jobs.length > 0) {
+	    return;
+	}
+
+	var job = new Job(jobName) {
+	    @Override
+	    protected IStatus run(IProgressMonitor monitor) {
+		BSLCommon.runDownloadImageApp();
+		if (pathToImageApp.toFile().exists()) {
+		    return Status.OK_STATUS;
+		}
+		return Status.CANCEL_STATUS;
+	    }
+	};
+	job.addJobChangeListener(new JobChangeAdapter() {
+	    @Override
+	    public void done(IJobChangeEvent event) {
+		if (event.getResult().isOK()) {
+		    BSLPlugin.getPlugin().restartLS();
+		}
+	    }
+	});
+	job.schedule();
+    }
+    
     public static void runDownloadImageApp() {
 	try {
 	    downloadImageApp();
