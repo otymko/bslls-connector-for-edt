@@ -25,57 +25,19 @@ import com.github.otymko.dt.bsl.lsconnector.util.BSLCommon;
 
 public class BSLPlugin extends Plugin {
     public static final String PLUGIN_ID = "com.github.otymko.dt.bsl.ls_connector";
+    private static Map<String, IWorkbenchPart> workbenchParts = new ConcurrentHashMap<>();
     private static BSLPlugin plugin;
     private static BundleContext context;
-
     private WindowsEventService windowsEventService;
     private LSService lsService;
-
     private Path appDir;
     private Path pathToImageApp;
     private Path pathToWorkspace;
     private Optional<Path> pathToConfiguration;
     private ScopedPreferenceStore preferenceStore;
 
-    private static Map<String, IWorkbenchPart> workbenchParts = new ConcurrentHashMap<>();
-
     public static BSLPlugin getPlugin() {
 	return plugin;
-    }
-
-    public void start(BundleContext bundleContext) throws Exception {
-	plugin = this;
-	super.start(bundleContext);
-	BSLPlugin.context = bundleContext;
-
-	initialize();
-	startServices();
-	startLS();
-    }
-
-    public void stop(BundleContext bundleContext) throws Exception {
-	stopLS();
-	plugin = null;
-
-	if (PlatformUI.isWorkbenchRunning()) {
-	    for (var window : PlatformUI.getWorkbench().getWorkbenchWindows()) {
-		WindowEventListener.removeListenerFromAllPages(window);
-	    }
-	}
-
-	super.stop(bundleContext);
-    }
-
-    protected BundleContext getContext() {
-	return context;
-    }
-
-    public void sleepCurrentThread(long value) {
-	try {
-	    Thread.sleep(value);
-	} catch (Exception e) {
-	    createWarningStatus(e.getMessage());
-	}
     }
 
     public static IStatus createErrorStatus(String message, Throwable throwable) {
@@ -90,12 +52,103 @@ public class BSLPlugin extends Plugin {
 	return new Status(IStatus.WARNING, PLUGIN_ID, 0, message, null);
     }
 
+    @Override
+    public void start(BundleContext bundleContext) throws Exception {
+	plugin = this;
+	super.start(bundleContext);
+	BSLPlugin.context = bundleContext;
+
+	initialize();
+	startServices();
+	startLS();
+    }
+
+    @Override
+    public void stop(BundleContext bundleContext) throws Exception {
+	stopLS();
+	plugin = null;
+
+	if (PlatformUI.isWorkbenchRunning()) {
+	    for (var window : PlatformUI.getWorkbench().getWorkbenchWindows()) {
+		WindowEventListener.removeListenerFromAllPages(window);
+	    }
+	}
+
+	super.stop(bundleContext);
+    }
+
+    public void sleepCurrentThread(long value) {
+	try {
+	    Thread.sleep(value);
+	} catch (Exception e) {
+	    createWarningStatus(e.getMessage());
+	}
+    }
+
+    private void startLS() {
+	BSLCommon.downloadBSLLS(pathToImageApp);
+	lsService.start();
+    }
+
+    private void stopLS() {
+	lsService.stop();
+    }
+
     public void restartLS() {
 	lsService.restart();
     }
 
     public boolean isRunningLS() {
 	return lsService.isLaunched();
+    }
+
+    private void initialize() {
+	initAppDir();
+	initPreferenceStore();
+	prepareForStart();
+    }
+
+    private void startServices() {
+	windowsEventService = new WindowsEventService();
+	lsService = new LSService(this);
+    }
+
+    private void initPreferenceStore() {
+	preferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, PLUGIN_ID);
+	preferenceStore.setDefault(BSLPreferencePage.PATH_TO_BSLLS, plugin.getPathToImageApp().toString());
+	preferenceStore.setDefault(BSLPreferencePage.EXTERNAL_JAR, false);
+	preferenceStore.setDefault(BSLPreferencePage.PATH_TO_JAVA, "java");
+	preferenceStore.setDefault(BSLPreferencePage.JAVA_OPTS, "");
+    }
+
+    private void prepareForStart() {
+	pathToWorkspace = ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile().toPath();
+
+	try {
+	    searchConfigurationFile();
+	} catch (IOException e) {
+	    createErrorStatus(e.getMessage(), e);
+	}
+    }
+
+    private void searchConfigurationFile() throws IOException {
+	pathToConfiguration = BSLCommon.getConfigurationFileFromWorkspace(pathToWorkspace);
+    }
+
+    private void initAppDir() {
+	appDir = Path.of(System.getProperty("user.home"), ".bsl-connector-for-edt");
+	if (!appDir.toFile().exists()) {
+	    appDir.toFile().mkdir();
+	}
+
+	// проверим есть ли image app BSL LS
+	var pathToApp = Path.of(appDir.toString(), "bsl-language-server").toFile();
+	if (!pathToApp.exists()) {
+	    pathToApp.mkdir();
+	}
+
+	// путь к image app
+	pathToImageApp = Path.of(pathToApp.toString(), "bsl-language-server.exe");
     }
 
     public BSLConnector getBSLConnector() {
@@ -130,61 +183,8 @@ public class BSLPlugin extends Plugin {
 	return pathToConfiguration;
     }
 
-    private void initialize() {
-	initAppDir();
-	initPreferenceStore();
-	prepareForStart();
+    protected BundleContext getContext() {
+	return context;
     }
 
-    private void startServices() {
-	windowsEventService = new WindowsEventService();
-	lsService = new LSService(this);
-    }
-
-    private void initPreferenceStore() {
-	preferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, PLUGIN_ID);
-	preferenceStore.setDefault(BSLPreferencePage.PATH_TO_BSLLS, plugin.getPathToImageApp().toString());
-	preferenceStore.setDefault(BSLPreferencePage.EXTERNAL_JAR, false);
-	preferenceStore.setDefault(BSLPreferencePage.PATH_TO_JAVA, "java");
-	preferenceStore.setDefault(BSLPreferencePage.JAVA_OPTS, "");
-    }
-
-    private void prepareForStart() {
-	pathToWorkspace = ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile().toPath();
-
-	try {
-	    searchConfigurationFile();
-	} catch (IOException e) {
-	    createErrorStatus(e.getMessage(), e);
-	}
-    }
-
-    private void startLS() {
-	BSLCommon.downloadBSLLS(pathToImageApp);
-	lsService.start();
-    }
-
-    private void stopLS() {
-	lsService.stop();
-    }
-
-    private void searchConfigurationFile() throws IOException {
-	pathToConfiguration = BSLCommon.getConfigurationFileFromWorkspace(pathToWorkspace);
-    }
-
-    private void initAppDir() {
-	appDir = Path.of(System.getProperty("user.home"), ".bsl-connector-for-edt");
-	if (!appDir.toFile().exists()) {
-	    appDir.toFile().mkdir();
-	}
-
-	// проверим есть ли image app BSL LS
-	var pathToApp = Path.of(appDir.toString(), "bsl-language-server").toFile();
-	if (!pathToApp.exists()) {
-	    pathToApp.mkdir();
-	}
-
-	// путь к image app
-	pathToImageApp = Path.of(pathToApp.toString(), "bsl-language-server.exe");
-    }
 }
