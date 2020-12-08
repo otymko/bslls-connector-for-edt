@@ -39,7 +39,7 @@ public class OpenEditorTrigger implements IPartListener2 {
 	    var uri = BSLCommon.uri(editorPart.getResource().getLocationURI());
 	    var plugin = BSLPlugin.getPlugin();
 	    plugin.getWorkbenchParts().remove(uri.toString());
-	    plugin.getLSService().getConnector().textDocumentDidClose(uri);
+	    plugin.getLsService().getConnector().textDocumentDidClose(uri);
 	}
     }
 
@@ -55,7 +55,7 @@ public class OpenEditorTrigger implements IPartListener2 {
 	    var content = BSLCommon.getContentFromXtextEditor(editorPart);
 	    var plugin = BSLPlugin.getPlugin();
 	    plugin.getWorkbenchParts().put(uri.toString(), part);
-	    plugin.getLSService().getConnector().textDocumentDidOpen(uri, content);
+	    plugin.getLsService().getConnector().textDocumentDidOpen(uri, content);
 	}
     }
 

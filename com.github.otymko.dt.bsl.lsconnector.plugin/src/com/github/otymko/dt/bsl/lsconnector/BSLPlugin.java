@@ -26,21 +26,26 @@ import lombok.Getter;
 
 public class BSLPlugin extends Plugin {
     public static final String PLUGIN_ID = "com.github.otymko.dt.bsl.ls_connector";
+    @Getter
     private static Map<String, IWorkbenchPart> workbenchParts = new ConcurrentHashMap<>();
+    @Getter
     private static BSLPlugin plugin;
-    private static BundleContext context;
+    @Getter
+    protected static BundleContext context;
+    @Getter
     private WindowsEventService windowsEventService;
+    @Getter
     private LSService lsService;
+    @Getter
     private Path appDir;
+    @Getter
     private Path pathToImageApp;
+    @Getter
     private Path pathToWorkspace;
+    @Getter
     private Optional<Path> pathToConfiguration;
     @Getter
     private ScopedPreferenceStore preferenceStore;
-
-    public static BSLPlugin getPlugin() {
-	return plugin;
-    }
 
     public static IStatus createErrorStatus(String message, Throwable throwable) {
 	return new Status(IStatus.ERROR, PLUGIN_ID, 0, message, throwable);
@@ -152,37 +157,4 @@ public class BSLPlugin extends Plugin {
 	// путь к image app
 	pathToImageApp = Path.of(pathToApp.toString(), "bsl-language-server.exe");
     }
-
-    public Path getAppDir() {
-	return appDir;
-    }
-
-    public Path getPathToImageApp() {
-	return pathToImageApp;
-    }
-
-    public Map<String, IWorkbenchPart> getWorkbenchParts() {
-	return workbenchParts;
-    }
-
-    public Path getPathToWorkspace() {
-	return pathToWorkspace;
-    }
-
-    public WindowsEventService getWindowsEventService() {
-	return windowsEventService;
-    }
-
-    public Optional<Path> getPathToConfiguration() {
-	return pathToConfiguration;
-    }
-    
-    public LSService getLSService() {
-	return lsService;
-    }
-
-    protected BundleContext getContext() {
-	return context;
-    }
-
 }

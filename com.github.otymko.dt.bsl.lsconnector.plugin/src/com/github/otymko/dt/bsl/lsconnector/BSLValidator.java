@@ -40,7 +40,7 @@ public class BSLValidator implements IExternalBslValidator {
 	}
 
 	var plugin = BSLPlugin.getPlugin();
-	var connector = plugin.getLSService().getConnector();
+	var connector = plugin.getLsService().getConnector();
 
 	if (!plugin.isRunningLS()) {
 	    return;

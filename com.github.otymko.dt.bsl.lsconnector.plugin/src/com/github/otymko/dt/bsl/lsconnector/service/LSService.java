@@ -13,11 +13,14 @@ import com.github.otymko.dt.bsl.lsconnector.lsp.BSLConnector;
 import com.github.otymko.dt.bsl.lsconnector.lsp.BSLLanguageClient;
 import com.github.otymko.dt.bsl.lsconnector.ui.BSLPreferencePage;
 
+import lombok.Getter;
+
 public class LSService {
     private final BSLPlugin plugin;
     private final WindowsEventService windowsEventService;
     private final ScopedPreferenceStore preferenceStore;
     private Process process;
+    @Getter
     private BSLConnector connector;
     
     public LSService(BSLPlugin plugin) {
@@ -50,10 +53,6 @@ public class LSService {
     
     public boolean isLaunched() {
 	return process != null && process.isAlive();
-    }
-    
-    public BSLConnector getConnector() {
-	return connector;
     }
 
     private void createProcess() {

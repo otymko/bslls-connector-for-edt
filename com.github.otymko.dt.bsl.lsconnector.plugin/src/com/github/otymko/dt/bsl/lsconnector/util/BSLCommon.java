@@ -28,12 +28,15 @@ import org.eclipse.lsp4j.Range;
 import com._1c.g5.v8.dt.bsl.ui.editor.BslXtextEditor;
 import com.github.otymko.dt.bsl.lsconnector.BSLPlugin;
 
-public class BSLCommon {
-    public static final URI FAKE_URI = Path.of("fake.bsl").toUri();
-    private static final int BUFFER_SIZE = 4096;
-    private static final int DEFAULT_TIMEOUT = 300;
+import lombok.experimental.UtilityClass;
 
-    public static void downloadBSLLS(Path pathToImageApp) {
+@UtilityClass
+public class BSLCommon {
+    public final URI FAKE_URI = Path.of("fake.bsl").toUri();
+    private final int BUFFER_SIZE = 4096;
+    private final int DEFAULT_TIMEOUT = 300;
+
+    public void downloadBSLLS(Path pathToImageApp) {
 	if (pathToImageApp.toFile().exists()) {
 	    return;
 	}
@@ -66,7 +69,7 @@ public class BSLCommon {
 	job.schedule();
     }
     
-    public static void runDownloadImageApp() {
+    public void runDownloadImageApp() {
 	try {
 	    downloadImageApp();
 	} catch (IOException e) {
@@ -74,13 +77,13 @@ public class BSLCommon {
 	}
     }
 
-    public static void downloadLS(File file, String urlRelease) throws MalformedURLException, IOException {
+    public void downloadLS(File file, String urlRelease) throws MalformedURLException, IOException {
 	if (!file.exists()) {
 	    FileUtils.copyURLToFile(new URL(urlRelease), file, DEFAULT_TIMEOUT, 0);
 	}
     }
 
-    public static void unzip(String zipFilePath, String destDirectory) throws IOException {
+    public void unzip(String zipFilePath, String destDirectory) throws IOException {
 	var destDir = new File(destDirectory);
 	if (!destDir.exists()) {
 	    destDir.mkdir();
@@ -104,7 +107,7 @@ public class BSLCommon {
 	zipIn.close();
     }
 
-    public static Optional<Path> getConfigurationFileFromWorkspace(Path pathToWorkspace) throws IOException {
+    public Optional<Path> getConfigurationFileFromWorkspace(Path pathToWorkspace) throws IOException {
 	var listFiles = Files.walk(pathToWorkspace).filter(Files::isRegularFile)
 		.filter(path -> path.endsWith(".bsl-language-server.json")).collect(Collectors.toList());
 	if (!listFiles.isEmpty()) {
@@ -113,14 +116,14 @@ public class BSLCommon {
 	return Optional.empty();
     }
 
-    public static int[] getOffsetByRange(Range range, Document document) throws BadLocationException {
+    public int[] getOffsetByRange(Range range, Document document) throws BadLocationException {
 	int offset, lenght = 0;
 	offset = document.getLineOffset(range.getStart().getLine()) + range.getStart().getCharacter();
 	lenght = document.getLineOffset(range.getEnd().getLine()) + range.getEnd().getCharacter() - offset;
 	return new int[] { offset, lenght };
     }
 
-    public static String getContentFromXtextEditor(BslXtextEditor editor) {
+    public String getContentFromXtextEditor(BslXtextEditor editor) {
 	var document = editor.getDocument();
 	if (document == null) {
 	    return "";
@@ -132,14 +135,14 @@ public class BSLCommon {
 	return content;
     }
 
-    public static String getLatestReleaseURL() {
+    public String getLatestReleaseURL() {
 	// FIXME: переехать на получение последнего с GitHub
 	// нужно учесть, что мининимальная допустимая версия - 0.17.0
 	return "https://github.com/1c-syntax/bsl-language-server/releases/download/v0.17.0-RC3/bsl-language-server_win.zip";
     }
 
     // FIXME: временно взято из https://github.com/1c-syntax/utils
-    public static URI uri(URI uri) {
+    public URI uri(URI uri) {
 	var decodedUri = URI.create(uri.getScheme() + ":" + uri.getSchemeSpecificPart().replace(" ", "%20"));
 
 	if ("file".equals(decodedUri.getScheme()) && decodedUri.getAuthority() == null) {
@@ -150,7 +153,7 @@ public class BSLCommon {
     }
 
     // FIXME: временно взято из https://github.com/1c-syntax/utils
-    private static Path path(File file) {
+    private Path path(File file) {
 	try {
 	    return file.getCanonicalFile().toPath().toAbsolutePath();
 	} catch (IOException e) {
@@ -160,7 +163,7 @@ public class BSLCommon {
 
     }
 
-    private static void downloadImageApp() throws MalformedURLException, IOException {
+    private void downloadImageApp() throws MalformedURLException, IOException {
 	var appDir = BSLPlugin.getPlugin().getAppDir();
 	var file = Path.of(appDir.toString(), "bsl-language-server.zip").toFile();
 	if (!file.exists()) {
@@ -170,7 +173,7 @@ public class BSLCommon {
 	unzip(file.toString(), appDir.toString());
     }
 
-    private static void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
+    private void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
 	var bos = new BufferedOutputStream(new FileOutputStream(filePath));
 	var bytesIn = new byte[BUFFER_SIZE];
 	var read = 0;
