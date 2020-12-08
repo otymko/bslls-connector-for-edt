@@ -33,7 +33,6 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class BSLCommon {
-    public final URI FAKE_URI = Path.of("fake.bsl").toUri();
     private final int BUFFER_SIZE = 4096;
     private final int DEFAULT_TIMEOUT = 300;
 
