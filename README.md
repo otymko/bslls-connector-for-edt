@@ -12,6 +12,11 @@
 
 ## Установка
 
+Для разработки в Eclipse требуется:
+* Eclipse for Committer 2020-06 / 2020-09
+* Плагин lombok (https://projectlombok.org/setup/eclipse)
+* Java 11
+
 ### Установка из архива
 
 Порядок действий:
