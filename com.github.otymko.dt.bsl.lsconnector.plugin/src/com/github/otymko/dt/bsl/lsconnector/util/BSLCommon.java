@@ -26,6 +26,7 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.lsp4j.Range;
 
 import com._1c.g5.v8.dt.bsl.ui.editor.BslXtextEditor;
+import com.github._1c_syntax.utils.Absolute;
 import com.github.otymko.dt.bsl.lsconnector.BSLPlugin;
 
 import lombok.experimental.UtilityClass;
@@ -141,26 +142,8 @@ public class BSLCommon {
 	return "https://github.com/1c-syntax/bsl-language-server/releases/download/v0.17.0-RC3/bsl-language-server_win.zip";
     }
 
-    // FIXME: временно взято из https://github.com/1c-syntax/utils
     public URI uri(URI uri) {
-	var decodedUri = URI.create(uri.getScheme() + ":" + uri.getSchemeSpecificPart().replace(" ", "%20"));
-
-	if ("file".equals(decodedUri.getScheme()) && decodedUri.getAuthority() == null) {
-	    return path(new File(decodedUri)).toUri();
-	}
-
-	return decodedUri;
-    }
-
-    // FIXME: временно взято из https://github.com/1c-syntax/utils
-    private Path path(File file) {
-	try {
-	    return file.getCanonicalFile().toPath().toAbsolutePath();
-	} catch (IOException e) {
-	    BSLPlugin.createErrorStatus(e.getMessage(), e);
-	}
-	return null;
-
+	return Absolute.uri(uri);
     }
 
     private void downloadImageApp() throws MalformedURLException, IOException {

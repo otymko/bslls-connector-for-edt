@@ -125,5 +125,9 @@
 		<repository location="https://otymko.github.io/edt-p2-registry/update/lombok/1.18.16/"/>
 		<unit id="org.projectlombok.lombok" version="1.18.16"/>
 	</location>
+	<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
+		<repository location="https://otymko.github.io/edt-p2-registry/update/utils/v0.3.1/"/>
+		<unit id="com.github.1c-syntax.utils" version="0.3.1"/>
+	</location>
 </locations>
 </target>
