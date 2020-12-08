@@ -110,6 +110,43 @@
                 </filesets>
             </configuration>
         </plugin>
+        <plugin>
+	        <groupId>org.projectlombok</groupId>
+	        <artifactId>lombok-maven-plugin</artifactId>
+	        <version>1.18.16.0</version>
+	        <executions>
+		        <execution>
+		          <phase>generate-sources</phase>
+		          <goals>
+		            <goal>delombok</goal>
+		          </goals>
+		        </execution>
+		    </executions>
+	    </plugin>
+
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-resources-plugin</artifactId>
+      <version>2.3</version>
+      <executions>
+          <execution>
+              <id>copy-prod-resources</id>
+              <phase>process-resources</phase>
+              <goals>
+                  <goal>copy-resources</goal>
+              </goals>
+              <configuration>
+                  <outputDirectory>src/main/java</outputDirectory>
+                  <resources>
+                      <resource>
+                          <directory>target/generated-sources/delombok</directory>
+                          <filtering>false</filtering>
+                      </resource>
+                  </resources>
+              </configuration>
+          </execution>
+      </executions>
+  </plugin>  
     </plugins>
     <pluginManagement>
       <plugins>
@@ -190,6 +227,11 @@
               </configuration>
             </execution>
           </executions>
+        </plugin>
+      	<plugin>
+          <groupId>org.projectlombok</groupId>
+          <artifactId>lombok-maven-plugin</artifactId>
+          <version>1.18.16.0</version>
         </plugin>
       </plugins>
     </pluginManagement>

@@ -17,11 +17,12 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.osgi.framework.BundleContext;
 
 import com.github.otymko.dt.bsl.lsconnector.listener.WindowEventListener;
-import com.github.otymko.dt.bsl.lsconnector.lsp.BSLConnector;
 import com.github.otymko.dt.bsl.lsconnector.service.LSService;
 import com.github.otymko.dt.bsl.lsconnector.service.WindowsEventService;
 import com.github.otymko.dt.bsl.lsconnector.ui.BSLPreferencePage;
 import com.github.otymko.dt.bsl.lsconnector.util.BSLCommon;
+
+import lombok.Getter;
 
 public class BSLPlugin extends Plugin {
     public static final String PLUGIN_ID = "com.github.otymko.dt.bsl.ls_connector";
@@ -34,6 +35,7 @@ public class BSLPlugin extends Plugin {
     private Path pathToImageApp;
     private Path pathToWorkspace;
     private Optional<Path> pathToConfiguration;
+    @Getter
     private ScopedPreferenceStore preferenceStore;
 
     public static BSLPlugin getPlugin() {
@@ -157,10 +159,6 @@ public class BSLPlugin extends Plugin {
 
     public Path getPathToImageApp() {
 	return pathToImageApp;
-    }
-
-    public ScopedPreferenceStore getPreferenceStore() {
-	return preferenceStore;
     }
 
     public Map<String, IWorkbenchPart> getWorkbenchParts() {
