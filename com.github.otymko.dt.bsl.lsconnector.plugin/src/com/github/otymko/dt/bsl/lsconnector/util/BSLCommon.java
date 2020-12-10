@@ -138,7 +138,7 @@ public class BSLCommon {
     public String getLatestReleaseURL() {
 	// FIXME: переехать на получение последнего с GitHub
 	// нужно учесть, что мининимальная допустимая версия - 0.17.0
-	return "https://github.com/1c-syntax/bsl-language-server/releases/download/v0.17.0-RC3/bsl-language-server_win.zip";
+	return "https://github.com/1c-syntax/bsl-language-server/releases/download/v0.17.0-RC4/bsl-language-server_win.zip";
     }
 
     public URI uri(URI uri) {
