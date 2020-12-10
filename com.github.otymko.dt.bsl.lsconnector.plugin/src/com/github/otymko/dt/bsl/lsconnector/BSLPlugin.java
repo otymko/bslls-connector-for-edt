@@ -27,7 +27,7 @@ import lombok.Getter;
 public class BSLPlugin extends Plugin {
     public static final String PLUGIN_ID = "com.github.otymko.dt.bsl.ls_connector";
     @Getter
-    private static Map<String, IWorkbenchPart> workbenchParts = new ConcurrentHashMap<>();
+    private Map<String, IWorkbenchPart> workbenchParts = new ConcurrentHashMap<>();
     @Getter
     private static BSLPlugin plugin;
     @Getter

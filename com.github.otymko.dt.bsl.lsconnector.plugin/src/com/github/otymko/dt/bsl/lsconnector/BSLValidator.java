@@ -64,7 +64,7 @@ public class BSLValidator implements IExternalBslValidator {
 	var uri = BSLCommon.uri(moduleFile.getLocationURI());
 
 	// Костыль при открытии, если на форме нет фокуса
-	if (BSLPlugin.getWorkbenchParts().get(uri.toString()) == null) {
+	if (plugin.getWorkbenchParts().get(uri.toString()) == null) {
 	    connector.textDocumentDidOpen(uri, content);
 	} else {
 	    connector.textDocumentDidChange(uri, content);
@@ -74,10 +74,6 @@ public class BSLValidator implements IExternalBslValidator {
 	plugin.sleepCurrentThread(1000);
 	// попытка прервать
 	if (monitor.isCanceled()) {
-	    return;
-	}
-	// если документ уже закрыт
-	if (BSLPlugin.getWorkbenchParts().get(uri.toString()) == null) {
 	    return;
 	}
 
