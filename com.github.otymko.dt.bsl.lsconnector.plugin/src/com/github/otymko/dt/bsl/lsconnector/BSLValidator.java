@@ -39,6 +39,12 @@ public class BSLValidator implements IExternalBslValidator {
 	    return;
 	}
 
+	BSLPlugin.getPlugin().getLsService().getConnector()
+		.runFutureTask(() -> validateFuture(object, messageAcceptor, monitor));
+    }
+
+    private void validateFuture(EObject object, CustomValidationMessageAcceptor messageAcceptor,
+	    CancelIndicator monitor) {
 	var plugin = BSLPlugin.getPlugin();
 	var connector = plugin.getLsService().getConnector();
 
@@ -58,7 +64,7 @@ public class BSLValidator implements IExternalBslValidator {
 	var uri = BSLCommon.uri(moduleFile.getLocationURI());
 
 	// Костыль при открытии, если на форме нет фокуса
-	if (plugin.getWorkbenchParts().get(uri.toString()) == null) {
+	if (BSLPlugin.getWorkbenchParts().get(uri.toString()) == null) {
 	    connector.textDocumentDidOpen(uri, content);
 	} else {
 	    connector.textDocumentDidChange(uri, content);
@@ -70,6 +76,10 @@ public class BSLValidator implements IExternalBslValidator {
 	if (monitor.isCanceled()) {
 	    return;
 	}
+	// если документ уже закрыт
+	if (BSLPlugin.getWorkbenchParts().get(uri.toString()) == null) {
+	    return;
+	}
 
 	var diagnostics = connector.diagnostics(uri.toString());
 
@@ -77,7 +87,7 @@ public class BSLValidator implements IExternalBslValidator {
 	if (monitor.isCanceled()) {
 	    return;
 	}
-	
+
 	diagnostics.forEach(diagnostic -> {
 	    // попытка прервать
 	    if (monitor.isCanceled()) {

@@ -10,6 +10,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.lsp4j.ClientCapabilities;
 import org.eclipse.lsp4j.CodeActionCapabilities;
@@ -41,6 +43,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 public class BSLConnector {
+    private static final int DEFAULT_TIMEOUT = 10;
+    private static final int DEFAULT_SMALL_TIMEOUT = 2;
     private static final String LAUNCHER_NAME = "BSLLanguageLauncher";
     private static final Gson GSON = new Gson();
     @SuppressWarnings("serial")
@@ -103,15 +107,14 @@ public class BSLConnector {
 	item.setUri(uri.toString());
 	item.setText(text);
 	params.setTextDocument(item);
-	server.getTextDocumentService().didOpen(params);
+	runFutureTask(() -> server.getTextDocumentService().didOpen(params), DEFAULT_SMALL_TIMEOUT);
     }
 
     public void textDocumentDidSave(URI uri) {
 	var paramsSave = new DidSaveTextDocumentParams();
 	var textDocumentIdentifier = new TextDocumentIdentifier();
 	textDocumentIdentifier.setUri(uri.toString());
-	paramsSave.setTextDocument(textDocumentIdentifier);
-	server.getTextDocumentService().didSave(paramsSave);
+	runFutureTask(() -> server.getTextDocumentService().didSave(paramsSave), DEFAULT_SMALL_TIMEOUT);
     }
 
     public void textDocumentDidChange(URI uri, String text) {
@@ -125,14 +128,14 @@ public class BSLConnector {
 	List<TextDocumentContentChangeEvent> list = new ArrayList<>();
 	list.add(textDocument);
 	params.setContentChanges(list);
-	server.getTextDocumentService().didChange(params);
+	runFutureTask(() -> server.getTextDocumentService().didChange(params), DEFAULT_SMALL_TIMEOUT);
     }
 
     public void textDocumentDidClose(URI uri) {
 	var params = new DidCloseTextDocumentParams();
 	var textDocument = new TextDocumentIdentifier(uri.toString());
 	params.setTextDocument(textDocument);
-	server.getTextDocumentService().didClose(params);
+	runFutureTask(() -> server.getTextDocumentService().didClose(params), DEFAULT_SMALL_TIMEOUT);
     }
 
     public List<Diagnostic> diagnostics(String uri) {
@@ -141,6 +144,22 @@ public class BSLConnector {
 	var params = new DiagnosticParams(textDocument, range);
 	var result = launcher.getRemoteEndpoint().request("textDocument/x-diagnostics", params);
 	return getDiagnosticFromFuture(result);
+    }
+    
+    public void runFutureTask(Runnable runnable) {
+	runFutureTask(runnable, DEFAULT_TIMEOUT);
+    }
+    
+    public void runFutureTask(Runnable runnable, int timeoutInSeconds) {
+	var threadpool = Executors.newCachedThreadPool();
+	var futureTask = threadpool.submit(runnable);
+	try {
+	    futureTask.get(timeoutInSeconds, TimeUnit.SECONDS);
+	    } catch (Exception e){
+	        e.printStackTrace();
+	        futureTask.cancel(true);
+	    }
+	threadpool.shutdown();
     }
 
     private void start() {
@@ -165,9 +184,9 @@ public class BSLConnector {
 	JsonArray array = null;
 
 	try {
-	    response = (JsonObject) future.get();
+	    response = (JsonObject) future.get(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
 	    array = (JsonArray) response.get("diagnostics");
-	} catch (InterruptedException | ExecutionException e) {
+	} catch (Exception e) {
 	    BSLPlugin.createErrorStatus(e.getMessage(), e);
 	}
 
