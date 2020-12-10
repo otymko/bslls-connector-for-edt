@@ -64,16 +64,21 @@ public class BSLValidator implements IExternalBslValidator {
 	var uri = BSLCommon.uri(moduleFile.getLocationURI());
 
 	// Костыль при открытии, если на форме нет фокуса
-	if (plugin.getWorkbenchParts().get(uri.toString()) == null) {
-	    connector.textDocumentDidOpen(uri, content);
-	} else {
+	if (plugin.getWorkbenchParts().contains(uri.toString())) {
 	    connector.textDocumentDidChange(uri, content);
+	} else {
+	    plugin.getWorkbenchParts().add(uri.toString());
+	    connector.textDocumentDidOpen(uri, content);
 	}
 
 	// FIXME: иначе может быть NPE
 	plugin.sleepCurrentThread(1000);
 	// попытка прервать
 	if (monitor.isCanceled()) {
+	    return;
+	}
+	// если документ уже закрыт
+	if (!plugin.getWorkbenchParts().contains(uri.toString())) {
 	    return;
 	}
 

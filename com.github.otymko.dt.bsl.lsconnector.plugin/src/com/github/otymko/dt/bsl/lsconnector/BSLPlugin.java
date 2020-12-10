@@ -2,16 +2,16 @@ package com.github.otymko.dt.bsl.lsconnector;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Map;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Set;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.osgi.framework.BundleContext;
@@ -27,7 +27,7 @@ import lombok.Getter;
 public class BSLPlugin extends Plugin {
     public static final String PLUGIN_ID = "com.github.otymko.dt.bsl.ls_connector";
     @Getter
-    private Map<String, IWorkbenchPart> workbenchParts = new ConcurrentHashMap<>();
+    private Set<String> workbenchParts = Collections.synchronizedSet(new HashSet<>());
     @Getter
     private static BSLPlugin plugin;
     @Getter
