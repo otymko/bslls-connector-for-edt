@@ -28,6 +28,10 @@
 
 Теперь при открытии модуля будет запущена проверка кода, в том числе с помощью BSL LS. Поиск файла `.bsl-language-server.json` (для настройки BSL LS) ведется в каталоге проекта workspace.
 
+Шаблонный файл `.bsl-language-server.json` можно взять [example/.bsl-language-server.json](/example/.bsl-language-server.json). Важно учесть:
+* Значение `computeTrigger` в конфигурационном файле обязательно должно быть `onSave`.
+* Путь к метаданным проекта указывается в свойстве `configurationRoot`.
+
 ## Разработчикам
 ### Локальная сборка плагина на Windows
 
