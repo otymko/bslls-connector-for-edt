@@ -4,5 +4,6 @@
       <category name="com.github.otymko.dt.bsl.lsconnector.plugin.category.public"/>
    </feature>
    <feature id="org.eclipse.lsp4j.sdk"/>
+   <bundle id="com.github.1c-syntax.utils"/>
    <category-def name="com.github.otymko.dt.bsl.lsconnector.plugin.category.public" label="1C: Enterprise Development Tools Plugin"/>
 </site>
