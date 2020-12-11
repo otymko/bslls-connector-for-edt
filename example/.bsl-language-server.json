@@ -1,0 +1,7 @@
+{
+    "$schema": "https://1c-syntax.github.io/bsl-language-server/dev/configuration/schema.json",
+    "diagnostics": {
+        "computeTrigger": "onSave"
+    },
+    "configurationRoot": "src"
+}

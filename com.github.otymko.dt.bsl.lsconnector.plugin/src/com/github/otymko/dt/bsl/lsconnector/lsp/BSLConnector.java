@@ -10,7 +10,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.lsp4j.ClientCapabilities;
 import org.eclipse.lsp4j.CodeActionCapabilities;
@@ -24,6 +25,7 @@ import org.eclipse.lsp4j.DidOpenTextDocumentParams;
 import org.eclipse.lsp4j.DidSaveTextDocumentParams;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
+import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.TextDocumentClientCapabilities;
 import org.eclipse.lsp4j.TextDocumentContentChangeEvent;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
@@ -34,12 +36,15 @@ import org.eclipse.lsp4j.launch.LSPLauncher;
 import org.eclipse.lsp4j.services.LanguageServer;
 
 import com.github.otymko.dt.bsl.lsconnector.BSLPlugin;
+import com.github.otymko.dt.bsl.lsconnector.util.BSLCommon;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 public class BSLConnector {
+    private static final int DEFAULT_TIMEOUT = 10;
+    private static final int DEFAULT_SMALL_TIMEOUT = 2;
     private static final String LAUNCHER_NAME = "BSLLanguageLauncher";
     private static final Gson GSON = new Gson();
     @SuppressWarnings("serial")
@@ -67,13 +72,16 @@ public class BSLConnector {
     }
 
     public CompletableFuture<InitializeResult> initialize() {
+	var rootUri = BSLCommon.uri(BSLPlugin.getPlugin().getPathToWorkspace().toUri());
+
 	var params = new InitializeParams();
 	params.setProcessId((int) ProcessHandle.current().pid());
 	params.setTrace("verbose"); // TODO:вынести в константы
+	params.setRootUri(rootUri.toString());
 
-	ClientCapabilities serverCapabilities = new ClientCapabilities();
-	TextDocumentClientCapabilities textDocument = new TextDocumentClientCapabilities();
-	CodeActionCapabilities codeActionCapabilities = new CodeActionCapabilities(false);
+	var serverCapabilities = new ClientCapabilities();
+	var textDocument = new TextDocumentClientCapabilities();
+	var codeActionCapabilities = new CodeActionCapabilities(false);
 	textDocument.setCodeAction(codeActionCapabilities);
 	textDocument.setCodeAction(new CodeActionCapabilities(new CodeActionLiteralSupportCapabilities(
 		new CodeActionKindCapabilities(Arrays.asList("", CodeActionKind.QuickFix))), false));
@@ -94,25 +102,24 @@ public class BSLConnector {
 
     public void textDocumentDidOpen(URI uri, String text) {
 	DidOpenTextDocumentParams params = new DidOpenTextDocumentParams();
-	TextDocumentItem item = new TextDocumentItem();
+	var item = new TextDocumentItem();
 	item.setLanguageId("bsl"); // TODO: вынести в константы
 	item.setUri(uri.toString());
 	item.setText(text);
 	params.setTextDocument(item);
-	server.getTextDocumentService().didOpen(params);
+	runFutureTask(() -> server.getTextDocumentService().didOpen(params), DEFAULT_SMALL_TIMEOUT);
     }
 
     public void textDocumentDidSave(URI uri) {
 	var paramsSave = new DidSaveTextDocumentParams();
-	TextDocumentIdentifier textDocumentIdentifier = new TextDocumentIdentifier();
+	var textDocumentIdentifier = new TextDocumentIdentifier();
 	textDocumentIdentifier.setUri(uri.toString());
-	paramsSave.setTextDocument(textDocumentIdentifier);
-	server.getTextDocumentService().didSave(paramsSave);
+	runFutureTask(() -> server.getTextDocumentService().didSave(paramsSave), DEFAULT_SMALL_TIMEOUT);
     }
 
     public void textDocumentDidChange(URI uri, String text) {
 	var params = new DidChangeTextDocumentParams();
-	VersionedTextDocumentIdentifier versionedTextDocumentIdentifier = new VersionedTextDocumentIdentifier();
+	var versionedTextDocumentIdentifier = new VersionedTextDocumentIdentifier();
 	versionedTextDocumentIdentifier.setUri(uri.toString());
 	versionedTextDocumentIdentifier.setVersion(0);
 	params.setTextDocument(versionedTextDocumentIdentifier);
@@ -121,26 +128,43 @@ public class BSLConnector {
 	List<TextDocumentContentChangeEvent> list = new ArrayList<>();
 	list.add(textDocument);
 	params.setContentChanges(list);
-	server.getTextDocumentService().didChange(params);
+	runFutureTask(() -> server.getTextDocumentService().didChange(params), DEFAULT_SMALL_TIMEOUT);
     }
-    
+
     public void textDocumentDidClose(URI uri) {
 	var params = new DidCloseTextDocumentParams();
 	var textDocument = new TextDocumentIdentifier(uri.toString());
 	params.setTextDocument(textDocument);
-	server.getTextDocumentService().didClose(params);
+	runFutureTask(() -> server.getTextDocumentService().didClose(params), DEFAULT_SMALL_TIMEOUT);
     }
 
     public List<Diagnostic> diagnostics(String uri) {
-	TextDocumentIdentifier textDocument = new TextDocumentIdentifier(uri);
-	DiagnosticParams params = new DiagnosticParams(textDocument);
-	CompletableFuture<Object> result = launcher.getRemoteEndpoint().request("textDocument/x-diagnostics", params);
+	var textDocument = new TextDocumentIdentifier(uri);
+	Range range = null;
+	var params = new DiagnosticParams(textDocument, range);
+	var result = launcher.getRemoteEndpoint().request("textDocument/x-diagnostics", params);
 	return getDiagnosticFromFuture(result);
+    }
+    
+    public void runFutureTask(Runnable runnable) {
+	runFutureTask(runnable, DEFAULT_TIMEOUT);
+    }
+    
+    public void runFutureTask(Runnable runnable, int timeoutInSeconds) {
+	var threadpool = Executors.newCachedThreadPool();
+	var futureTask = threadpool.submit(runnable);
+	try {
+	    futureTask.get(timeoutInSeconds, TimeUnit.SECONDS);
+	    } catch (Exception e){
+	        e.printStackTrace();
+	        futureTask.cancel(true);
+	    }
+	threadpool.shutdown();
     }
 
     private void start() {
 	launcher = LSPLauncher.createClientLauncher(client, in, out);
-	Future<?> future = launcher.startListening();
+	var future = launcher.startListening();
 	server = launcher.getRemoteProxy();
 	while (true) {
 	    try {
@@ -155,14 +179,14 @@ public class BSLConnector {
     }
 
     // TODO: перевести на lsp4j
-    private List<Diagnostic> getDiagnosticFromFuture(CompletableFuture<Object> future) {	
+    private List<Diagnostic> getDiagnosticFromFuture(CompletableFuture<Object> future) {
 	JsonObject response;
 	JsonArray array = null;
-	
+
 	try {
-	    response = (JsonObject) future.get();
+	    response = (JsonObject) future.get(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
 	    array = (JsonArray) response.get("diagnostics");
-	} catch (InterruptedException | ExecutionException e) {
+	} catch (Exception e) {
 	    BSLPlugin.createErrorStatus(e.getMessage(), e);
 	}
 

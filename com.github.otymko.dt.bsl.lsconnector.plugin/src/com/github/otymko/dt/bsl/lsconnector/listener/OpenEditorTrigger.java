@@ -11,16 +11,17 @@ public class OpenEditorTrigger implements IPartListener2 {
 
     @Override
     public void partActivated(IWorkbenchPartReference partRef) {
-	if (BSLPlugin.getPlugin().isRunningLS()) {
+	var plugin = BSLPlugin.getPlugin();
+	if (plugin.isRunningLS()) {
 	    return;
 	}
 
 	var part = partRef.getPart(true);
 	if (part instanceof BslXtextEditor) {
 	    var editorPart = (BslXtextEditor) part;
-	    var uri = editorPart.getResource().getLocationURI();
+	    var uri = BSLCommon.uri(editorPart.getResource().getLocationURI());
 
-	    if (BSLPlugin.getPlugin().getWorkbenchParts().get(uri.toString()) == null) {
+	    if (!plugin.getWorkbenchParts().contains(uri.toString())) {
 		partOpened(partRef);
 	    }
 	}
@@ -35,9 +36,10 @@ public class OpenEditorTrigger implements IPartListener2 {
 	var part = partRef.getPart(true);
 	if (part instanceof BslXtextEditor) {
 	    var editorPart = (BslXtextEditor) part;
-	    var uri = editorPart.getResource().getLocationURI();
-	    BSLPlugin.getPlugin().getWorkbenchParts().remove(uri.toString());
-	    BSLPlugin.getPlugin().getBSLConnector().textDocumentDidClose(uri);
+	    var uri = BSLCommon.uri(editorPart.getResource().getLocationURI());
+	    var plugin = BSLPlugin.getPlugin();
+	    plugin.getWorkbenchParts().remove(uri.toString());
+	    plugin.getLsService().getConnector().textDocumentDidClose(uri);
 	}
     }
 
@@ -49,10 +51,11 @@ public class OpenEditorTrigger implements IPartListener2 {
 	var part = partRef.getPart(true);
 	if (part instanceof BslXtextEditor) {
 	    var editorPart = (BslXtextEditor) part;
-	    var uri = editorPart.getResource().getLocationURI();
+	    var uri = BSLCommon.uri(editorPart.getResource().getLocationURI());
 	    var content = BSLCommon.getContentFromXtextEditor(editorPart);
-	    BSLPlugin.getPlugin().getWorkbenchParts().put(uri.toString(), part);
-	    BSLPlugin.getPlugin().getBSLConnector().textDocumentDidOpen(uri, content);
+	    var plugin = BSLPlugin.getPlugin();
+	    plugin.getWorkbenchParts().add(uri.toString());
+	    plugin.getLsService().getConnector().textDocumentDidOpen(uri, content);
 	}
     }
 

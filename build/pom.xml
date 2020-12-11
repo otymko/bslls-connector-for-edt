@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-  xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.otymko.dt.bsl.lsconnector</groupId>
   <artifactId>build</artifactId>
-  <version>0.2.0-SNAPSHOT</version>
+  <version>0.2.1-SNAPSHOT</version>
   <name>BSL LS connector for EDT</name>
   <packaging>pom</packaging>
 
@@ -25,15 +26,26 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
     <qualifier>${maven.build.timestamp}</qualifier>
+
+    <lombok.version>1.18.16</lombok.version>
   </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
 
   <modules>
     <module>../target</module>
-    <module>../com.github.otymko.dt.bsl.lsconnector.plugin</module> 
-    <module>../com.github.otymko.dt.bsl.lsconnector.feature</module> 
+    <module>../com.github.otymko.dt.bsl.lsconnector.plugin</module>
+    <module>../com.github.otymko.dt.bsl.lsconnector.feature</module>
     <module>../repository</module>
   </modules>
-  
+
   <build>
     <plugins>
       <plugin>
@@ -52,7 +64,7 @@
             <artifact>
               <groupId>com.github.otymko.dt.bsl.lsconnector.target</groupId>
               <artifactId>default</artifactId>
-              <version>0.2.0-SNAPSHOT</version>
+              <version>0.2.1-SNAPSHOT</version>
             </artifact>
           </target>
           <environments>
@@ -92,24 +104,24 @@
         </executions>
       </plugin>
       <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-clean-plugin</artifactId>
-            <version>2.4.1</version>
-            <configuration>
-                <filesets>
-                    <fileset>
-                        <directory>xtend-gen</directory>
-                        <includes>
-                            <include>**/*</include>
-                        </includes>
-                        <excludes>
-                            <exclude>.gitignore</exclude>
-                        </excludes>
-                        <followSymlinks>false</followSymlinks>
-                    </fileset>
-                </filesets>
-            </configuration>
-        </plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>2.4.1</version>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>xtend-gen</directory>
+              <includes>
+                <include>**/*</include>
+              </includes>
+              <excludes>
+                <exclude>.gitignore</exclude>
+              </excludes>
+              <followSymlinks>false</followSymlinks>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
     </plugins>
     <pluginManagement>
       <plugins>
@@ -125,6 +137,18 @@
             <showDeprecation>true</showDeprecation>
             <verbose>true</verbose>
           </configuration>
+          <dependencies>
+            <dependency>
+              <groupId>org.codehaus.plexus</groupId>
+              <artifactId>plexus-compiler-eclipse</artifactId>
+              <version>2.8.6</version>
+            </dependency>
+            <dependency>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>${lombok.version}</version>
+            </dependency>
+          </dependencies>
         </plugin>
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
@@ -187,6 +211,31 @@
               <!-- optionally you can configure a different target folder -->
               <configuration>
                 <outputDirectory>${basedir}/xtend-gen</outputDirectory>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>3.1.1</version>
+          <executions>
+            <execution>
+              <id>get-lombok</id>
+              <goals>
+                <goal>copy</goal>
+              </goals>
+              <configuration>
+                <artifactItems>
+                  <artifactItem>
+                    <groupId>org.projectlombok</groupId>
+                    <artifactId>lombok</artifactId>
+                    <version>${lombok.version}</version>
+                    <type>jar</type>
+                    <outputDirectory>${project.build.directory}</outputDirectory>
+                    <destFileName>lombok.jar</destFileName>
+                  </artifactItem>
+                </artifactItems>
               </configuration>
             </execution>
           </executions>

@@ -27,8 +27,9 @@ public class BSLValidator implements IExternalBslValidator {
     }
 
     @Override
-    @Check(CheckType.NORMAL)
+    @Check(CheckType.EXPENSIVE)
     public void validate(EObject object, CustomValidationMessageAcceptor messageAcceptor, CancelIndicator monitor) {
+	// попытка прервать
 	if (monitor.isCanceled()) {
 	    return;
 	}
@@ -38,7 +39,16 @@ public class BSLValidator implements IExternalBslValidator {
 	    return;
 	}
 
-	if (!BSLPlugin.getPlugin().isRunningLS()) {
+	BSLPlugin.getPlugin().getLsService().getConnector()
+		.runFutureTask(() -> validateFuture(object, messageAcceptor, monitor));
+    }
+
+    private void validateFuture(EObject object, CustomValidationMessageAcceptor messageAcceptor,
+	    CancelIndicator monitor) {
+	var plugin = BSLPlugin.getPlugin();
+	var connector = plugin.getLsService().getConnector();
+
+	if (!plugin.isRunningLS()) {
 	    return;
 	}
 
@@ -51,16 +61,41 @@ public class BSLValidator implements IExternalBslValidator {
 	var document = new Document(content);
 	var moduleFile = ResourcesPlugin.getWorkspace().getRoot()
 		.getFile(new Path(EcoreUtil.getURI(module).toPlatformString(true)));
-	var uri = moduleFile.getLocationURI();
+	var uri = BSLCommon.uri(moduleFile.getLocationURI());
 
 	// Костыль при открытии, если на форме нет фокуса
-	if (BSLPlugin.getPlugin().getWorkbenchParts().get(uri.toString()) == null) {
-	    BSLPlugin.getPlugin().getBSLConnector().textDocumentDidOpen(uri, content);
+	if (plugin.getWorkbenchParts().contains(uri.toString())) {
+	    connector.textDocumentDidChange(uri, content);
+	} else {
+	    plugin.getWorkbenchParts().add(uri.toString());
+	    connector.textDocumentDidOpen(uri, content);
 	}
-	BSLPlugin.getPlugin().getBSLConnector().textDocumentDidChange(uri, content);
 
-	var diagnostics = BSLPlugin.getPlugin().getBSLConnector().diagnostics(uri.toString());
-	diagnostics.forEach(diagnostic -> acceptIssue(module, messageAcceptor, diagnostic, document));
+	// FIXME: иначе может быть NPE
+	plugin.sleepCurrentThread(1000);
+	// попытка прервать
+	if (monitor.isCanceled()) {
+	    return;
+	}
+	// если документ уже закрыт
+	if (!plugin.getWorkbenchParts().contains(uri.toString())) {
+	    return;
+	}
+
+	var diagnostics = connector.diagnostics(uri.toString());
+
+	// попытка прервать
+	if (monitor.isCanceled()) {
+	    return;
+	}
+
+	diagnostics.forEach(diagnostic -> {
+	    // попытка прервать
+	    if (monitor.isCanceled()) {
+		return;
+	    }
+	    acceptIssue(module, messageAcceptor, diagnostic, document);
+	});
     }
 
     private void acceptIssue(Module module, CustomValidationMessageAcceptor messageAcceptor, Diagnostic diagnostic,
@@ -73,15 +108,13 @@ public class BSLValidator implements IExternalBslValidator {
 	    return;
 	}
 	var severity = diagnostic.getSeverity();
+	var message = "[BSL LS] " + diagnostic.getMessage();
 	if (severity == DiagnosticSeverity.Error) {
-	    messageAcceptor.acceptError(diagnostic.getMessage(), module, offsetParams[0], offsetParams[1],
-		    diagnostic.getCode());
+	    messageAcceptor.acceptError(message, module, offsetParams[0], offsetParams[1], diagnostic.getCode());
 	} else if (severity == DiagnosticSeverity.Warning) {
-	    messageAcceptor.acceptWarning(diagnostic.getMessage(), module, offsetParams[0], offsetParams[1],
-		    diagnostic.getCode());
+	    messageAcceptor.acceptWarning(message, module, offsetParams[0], offsetParams[1], diagnostic.getCode());
 	} else {
-	    messageAcceptor.acceptInfo(diagnostic.getMessage(), module, offsetParams[0], offsetParams[1],
-		    diagnostic.getCode());
+	    messageAcceptor.acceptInfo(message, module, offsetParams[0], offsetParams[1], diagnostic.getCode());
 	}
 
     }
