@@ -14,7 +14,7 @@
    </copyright>
 
    <plugin
-         id="com.github.otymko.dt.bsl.lspconnector"
+         id="com.github.otymko.dt.bsl.lsconnector"
          download-size="0"
          install-size="0"
          version="0.0.0"

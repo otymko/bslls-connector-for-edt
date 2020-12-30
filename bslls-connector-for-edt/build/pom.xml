@@ -7,7 +7,7 @@
   <groupId>com.github.otymko.dt.bsl.lsconnector</groupId>
   <artifactId>build</artifactId>
   <version>0.2.1-SNAPSHOT</version>
-  <name>BSL LS connector for EDT</name>
+  <name>build</name>
   <packaging>pom</packaging>
 
   <prerequisites>
@@ -38,13 +38,6 @@
       <scope>provided</scope>
     </dependency>
   </dependencies>
-
-  <modules>
-    <module>../target</module>
-    <module>../com.github.otymko.dt.bsl.lsconnector.plugin</module>
-    <module>../com.github.otymko.dt.bsl.lsconnector.feature</module>
-    <module>../repository</module>
-  </modules>
 
   <build>
     <plugins>
