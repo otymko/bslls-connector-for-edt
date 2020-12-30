@@ -11,6 +11,7 @@
     <relativePath>../build/pom.xml</relativePath>
   </parent>
   <artifactId>com.github.otymko.dt.bsl.lsconnector</artifactId>
+  <name>com.github.otymko.dt.bsl.lsconnector.feature</name>
   <packaging>eclipse-feature</packaging>
   <build>
     <plugins>

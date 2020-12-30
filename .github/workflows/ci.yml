@@ -28,7 +28,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ~/.m2/repository
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}-${{ hashFiles('target/default.target') }}
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}-${{ hashFiles('bslls-connector-for-edt/targets/default.target') }}
           restore-keys: ${{ runner.os }}-m2
 
       # https://edt.1c.ru/dev/ru/docs/plugins/project/build-install-publish-project/
@@ -40,7 +40,7 @@ jobs:
           mvn clean dependency:copy@get-lombok
           export MAVEN_OPTS=-javaagent:target/lombok.jar=ECJ
           mvn verify -PSDK,find-bugs -Dtycho.localArtifacts=ignore
-        working-directory: ./build
+        working-directory: ./bslls-connector-for-edt
         env:
           MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
           MAVEN_CENTRAL_TOKEN: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
