@@ -17,7 +17,7 @@
 https://otymko.github.io/bslls-connector-for-edt/update/bslls-connector-for-edt/latest/
 ```
 3. Нажмите `Добавить`.
-4. Установите флажок на `BSL LS connector for EDT`.
+4. Установите флажок на `BSL LS connector for EDT` и `LSP4J SDK`.
 5. Убедитесь, что установлен фложок `Обращаться во время инсталяции ко всем сайтам обновления для поиска требуемого ПО`.
 6. Нажмите `Далее` -> `Готово`.
 7. Перезапустите 1С:EDT.
