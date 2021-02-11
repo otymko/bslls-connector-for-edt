@@ -57,27 +57,31 @@ https://otymko.github.io/bslls-connector-for-edt/update/bslls-connector-for-edt/
 
 ### Локальная сборка плагина на Windows
 
-Порядок действий из каталога `build` (учитывая при сборке lombok https://projectlombok.org/setup/ecj):
+Сборка с использованием [lombok](https://projectlombok.org/setup/ecj):
 
-1. Очистите переменную среды MAVEN_OPTS от javaagent (пункт 3)
+> `tycho-compiler-plugin` не умеет обрабатывать аннотации `lombok` и дополнять байт-код вне приложения `eclipse` (там свой java-agent).
+> Поэтому нужно вручную переопределить `javaagent`-а для корректной сборки проекта.
+> Ниже сборка простым заявленным путем от вендора `lombok`
+
+1. Очистите переменную среды `MAVEN_OPTS` от `javaagent` (пункт 3)
 
 ```
 set MAVEN_OPTS=
 ```
 
-2. Скачайте lombok:
+2. Скачайте `lombok`:
 
 ```
 mvn clean dependency:copy@get-lombok
 ```
 
-3. Назначьте javaagent в переменную окружения
+3. Назначьте `javaagent` в переменную окружения
 
 ```
 set MAVEN_OPTS=-javaagent:target/lombok.jar=ECJ
 ```
 
-4. Проверьте и собирите проект
+4. Проверьте и соберите проект
 
 ```
 mvn verify -PSDK,find-bugs -Dtycho.localArtifacts=ignore
