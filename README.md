@@ -35,9 +35,9 @@ https://otymko.github.io/bslls-connector-for-edt/update/bslls-connector-for-edt/
 
 Шаблон файла `.bsl-language-server.json` можно взять [example/.bsl-language-server.json](/example/.bsl-language-server.json).
 
-Для работы плагина требуется:
-* Значение `computeTrigger` в `onSave`
-* Путь к метаданным проекта в свойстве `configurationRoot`
+Конфигурационный файл должен содержать:
+* Событие запуска анализа `computeTrigger` на `onSave`.
+* Путь к метаданным проекта в свойстве `configurationRoot`.
 
 ### Просмотр списка найденных проблем
 
