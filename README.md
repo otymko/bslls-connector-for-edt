@@ -33,7 +33,7 @@ https://otymko.github.io/bslls-connector-for-edt/update/bslls-connector-for-edt/
 
 Для настройки проверки используется файл [.bsl-language-server.json](https://1c-syntax.github.io/bsl-language-server/features/ConfigurationFile/).
 
-Шаблон файла `.bsl-language-server.json` можно взять [example/.bsl-language-server.json](/example/.bsl-language-server.json).
+Шаблон файла `.bsl-language-server.json` можно взять [example/.bsl-language-server.json](/example/.bsl-language-server.json). Разместите его в корне воркспейса.
 
 Конфигурационный файл должен содержать:
 * Событие запуска анализа `computeTrigger` на `onSave`.
