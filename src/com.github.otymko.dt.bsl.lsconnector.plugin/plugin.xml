@@ -10,7 +10,7 @@
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
-            class="com.github.otymko.dt.bsl.lsconnector.ui.BSLPreferencePage"
+            class="com.github.otymko.dt.bsl.lsconnector.ui.PluginPreferencePage"
             id="com.github.otymko.dt.bsl.lsconnector.plugin.page"
             name="Коннектор BSLLS">
       </page>
@@ -18,8 +18,7 @@
    <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
-            class="com.github.otymko.dt.bsl.lsconnector.ui.BSLPreferenceInitializer">
+            class="com.github.otymko.dt.bsl.lsconnector.ui.PluginPreferenceInitializer">
       </initializer>
    </extension>
-
 </plugin>
