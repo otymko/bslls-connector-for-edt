@@ -2,7 +2,7 @@
 <feature
       id="com.github.otymko.dt.bsl.lsconnector"
       label="%featureName"
-      version="0.2.1.qualifier"
+      version="0.3.0.qualifier"
       provider-name="%providerName">
 
    <description url="">

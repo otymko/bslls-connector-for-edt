@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/com.github.otymko.dt.bsl.lsconnector.plugin_0.2.1.qualifier.jar" id="com.github.otymko.dt.bsl.lsconnector" version="0.2.1.qualifier">
+   <feature url="features/com.github.otymko.dt.bsl.lsconnector.plugin_0.3.0.qualifier.jar" id="com.github.otymko.dt.bsl.lsconnector" version="0.3.0.qualifier">
       <category name="com.github.otymko.dt.bsl.lsconnector.plugin.category.public"/>
    </feature>
    <feature id="org.eclipse.lsp4j.sdk"/>
    <bundle id="com.github.1c-syntax.utils"/>
+   <bundle id="javax.websocket"/>
    <category-def name="com.github.otymko.dt.bsl.lsconnector.plugin.category.public" label="1C: Enterprise Development Tools Plugin"/>
 </site>

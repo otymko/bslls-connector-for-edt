@@ -8,11 +8,11 @@
   <parent>
     <groupId>com.github.otymko.dt.bsl.lsconnector</groupId>
     <artifactId>build</artifactId>
-    <version>0.2.1-SNAPSHOT</version>
+    <version>0.3.0-SNAPSHOT</version>
     <relativePath>../build/pom.xml</relativePath>
   </parent>
 
   <artifactId>bsl-lsconnector</artifactId>
-  <version>0.2.1-SNAPSHOT</version>
+  <version>0.3.0-SNAPSHOT</version>
   <packaging>eclipse-repository</packaging>
 </project>
