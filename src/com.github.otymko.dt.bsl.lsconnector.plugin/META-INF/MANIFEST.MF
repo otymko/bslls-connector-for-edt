@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Connector BSLLS
 Bundle-SymbolicName: com.github.otymko.dt.bsl.lsconnector;singleton:=true
-Bundle-Version: 0.2.1.qualifier
+Bundle-Version: 0.3.0.qualifier
 Bundle-Activator: com.github.otymko.dt.bsl.lsconnector.BSLActivator
 Require-Bundle: org.eclipse.core.runtime,
  com._1c.g5.v8.dt.bsl,
