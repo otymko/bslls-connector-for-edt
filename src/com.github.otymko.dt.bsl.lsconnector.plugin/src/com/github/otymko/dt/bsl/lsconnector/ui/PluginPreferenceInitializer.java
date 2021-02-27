@@ -14,6 +14,7 @@ public class PluginPreferenceInitializer extends AbstractPreferenceInitializer{
     @Override
     public void initializeDefaultPreferences() {
 	var preferenceStore = BSLActivator.getPlugin().getPreferenceStore();
+	preferenceStore.setDefault(PluginPreferencePage.PLUGIN_ENABLE, true);
 	preferenceStore.setDefault(PluginPreferencePage.PATH_TO_BSLLS, BSLCore.getInstance().getPathToImageApp().toString());
 	preferenceStore.setDefault(PluginPreferencePage.EXTERNAL_JAR, false);
 	preferenceStore.setDefault(PluginPreferencePage.PATH_TO_JAVA, "java");

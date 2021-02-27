@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 public class PluginSetting {
     boolean enable;
-    Path pathToJava;
+    String pathToJava;
     Path pathToLS;
     boolean externalJar;
     String javaOpts;

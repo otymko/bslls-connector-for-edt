@@ -2,10 +2,11 @@ package com.github.otymko.dt.bsl.lsconnector;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+
+import com.github.otymko.dt.bsl.lsconnector.core.BSLCore;
+import com.github.otymko.dt.bsl.lsconnector.util.SettingHelper;
 
 import lombok.Getter;
 
@@ -34,6 +35,12 @@ public class BSLActivator extends AbstractUIPlugin  {
     public void start(BundleContext bundleContext) throws Exception {
 	plugin = this;
 	super.start(bundleContext);
+	
+	var setting = SettingHelper.getSetting();
+	if (!setting.isEnable()) {
+	    return;
+	}
+	BSLCore.getInstance().checkExistLanguageServer();
     }
 
     @Override

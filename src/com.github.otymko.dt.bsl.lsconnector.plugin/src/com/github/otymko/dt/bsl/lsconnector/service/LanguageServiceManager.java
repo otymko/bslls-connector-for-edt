@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.resources.IProject;
 
+import com.github.otymko.dt.bsl.lsconnector.BSLActivator;
 import com.github.otymko.dt.bsl.lsconnector.core.BSLCore;
 import com.github.otymko.dt.bsl.lsconnector.util.ProjectHelper;
 
@@ -19,6 +20,15 @@ public class LanguageServiceManager {
     }
     
     public LanguageService getOrCreateService(URI uri) {
+	var pluginSetting = BSLCore.getInstance().getSetting();
+	if (!pluginSetting.isEnable()) {
+	    return null;
+	}
+	if (!pluginSetting.getPathToLS().toFile().exists()) {
+	    BSLActivator.createWarningStatus("Не удалось найти исполняемый файл BSL LS");
+	    return null;
+	}
+	
 	var projectOptional = ProjectHelper.getProjectByPath(Path.of(uri));
 	if (projectOptional.isEmpty()) {
 	    return null;
