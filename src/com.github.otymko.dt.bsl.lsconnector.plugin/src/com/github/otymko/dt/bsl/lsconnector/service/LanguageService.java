@@ -12,6 +12,7 @@ import com.github.otymko.dt.bsl.lsconnector.core.BSLCore;
 import com.github.otymko.dt.bsl.lsconnector.core.PluginSetting;
 import com.github.otymko.dt.bsl.lsconnector.lsp.BSLConnector;
 import com.github.otymko.dt.bsl.lsconnector.lsp.BSLLanguageClient;
+import com.github.otymko.dt.bsl.lsconnector.util.BSLConfigurationFinder;
 
 import lombok.Getter;
 
@@ -78,12 +79,12 @@ public class LanguageService {
 	    arguments.add("lsp");
 	}
 
-//	var pathToConfiguration = Path.of("D:\\DATA\\Develop\\runtime-New_configuration\\.bsl-language-server.json");
-////	if (pathToConfiguration.isPresent()) {
-//	    arguments.add("--configuration");
-//	    arguments.add(pathToConfiguration.toString());
-////	}
-
+	var optionalConfiguration = BSLConfigurationFinder.getPathToBSLConfiguration(pathToWorkspace, rootPath);
+	if (optionalConfiguration.isPresent()) {
+	    arguments.add("--configuration");
+	    arguments.add(optionalConfiguration.get().toString());
+	}
+	
 	BSLActivator.createWarningStatus(arguments.toString());
 
 	try {

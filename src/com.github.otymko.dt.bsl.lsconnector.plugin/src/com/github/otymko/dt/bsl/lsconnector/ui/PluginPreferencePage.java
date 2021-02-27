@@ -10,6 +10,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import com.github.otymko.dt.bsl.lsconnector.BSLActivator;
 
 public class PluginPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
+    public static final String PLUGIN_ENABLE = "ENABLE";
     public static final String PATH_TO_BSLLS = "PATH_TO_LS";
     public static final String EXTERNAL_JAR = "EXTERNAL_JAR";
     public static final String PATH_TO_JAVA = "PATH_TO_JAVA";
@@ -39,6 +40,9 @@ public class PluginPreferencePage extends FieldEditorPreferencePage implements I
 	
 	var javaOpts = new StringFieldEditor(JAVA_OPTS, "Java Opts", parent);
 	addField(javaOpts);
+	
+	var enable = new BooleanFieldEditor(PLUGIN_ENABLE, "Включить плагин", parent);
+	addField(enable);
     }
 
 }

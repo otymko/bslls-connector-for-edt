@@ -22,6 +22,7 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class ValidatorHelper {
+    private final String DIAGNOSTIC_PREFIX = "[BSL LS]";
     
     public URI getUriFromModule(Module module) {
 	var path = new Path(EcoreUtil.getURI(module).toPlatformString(true));
@@ -53,7 +54,7 @@ public class ValidatorHelper {
 	    return;
 	}
 	var severity = diagnostic.getSeverity();
-	var message = "[BSL LS] " + diagnostic.getMessage();
+	var message = String.format("%s %s", DIAGNOSTIC_PREFIX, diagnostic.getMessage());
 	if (severity == DiagnosticSeverity.Error) {
 	    messageAcceptor.acceptError(message, module, offsetParams[0], offsetParams[1], diagnostic.getCode());
 	} else if (severity == DiagnosticSeverity.Warning) {
