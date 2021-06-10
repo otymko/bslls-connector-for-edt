@@ -40,7 +40,7 @@ jobs:
           mvn clean dependency:copy@get-lombok
           export MAVEN_OPTS=-javaagent:target/lombok.jar=ECJ
           mvn verify -PSDK,find-bugs -Dtycho.localArtifacts=ignore
-        working-directory: ./bslls-connector-for-edt
+        working-directory: ./src
         env:
           MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
           MAVEN_CENTRAL_TOKEN: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
