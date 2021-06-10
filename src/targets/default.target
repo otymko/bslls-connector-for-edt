@@ -37,7 +37,6 @@
 <unit id="com._1c.g5.v8.dt.handly.feature.feature.group" version="0.0.0"/>
 <unit id="com._1c.g5.v8.dt.markermatcher.feature.feature.group" version="0.0.0"/>
 <unit id="com._1c.g5.v8.dt.platform.services.mobile.feature.feature.group" version="0.0.0"/>
-<unit id="com._1c.g5.v8.dt.platform.support_native.feature.feature.group" version="0.0.0"/>
 <unit id="com._1c.g5.v8.dt.platform.support_v8.3.8.feature.feature.group" version="0.0.0"/>
 <unit id="com._1c.g5.v8.dt.platform.support_v8.3.9.feature.feature.group" version="0.0.0"/>
 <unit id="com._1c.g5.v8.dt.platform.support_v8.3.10.feature.feature.group" version="0.0.0"/>
@@ -55,12 +54,10 @@
 <unit id="com._1c.g5.v8.dt.xtext.runtime.feature.group" version="0.0.0"/>
 <unit id="com._1c.g5.v8.dt.xtext.ui.feature.group" version="0.0.0"/>
 <unit id="com._1c.g5.wiring.feature.feature.group" version="0.0.0"/>
-<unit id="com.e1c.g5.v8.dt.codeaffine.feature.feature.group" version="0.0.0"/>
 <unit id="de.itemis.xtext.antlr.feature.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.babel.nls_eclipse_ru.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.babel.nls_technology.egit_ru.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.babel.nls_technology.jgit_ru.feature.group" version="0.0.0"/>
-<unit id="org.eclipse.babel.nls_tools.tm_ru.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.babel.nls_webtools_ru.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.draw2d.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.e4.rcp.feature.group" version="0.0.0"/>
@@ -109,7 +106,7 @@
 <unit id="org.eclipse.xsd.edit.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.xsd.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.xtext.xbase.lib.feature.group" version="0.0.0"/>
-<repository id="dt_repository" location="https://edt.1c.ru/releases/sapphire/2020.2/"/>
+<repository id="dt_repository" location="https://edt.1c.ru/releases/ruby/2021.1/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.license.feature.group" version="0.0.0"/>
