@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
+import org.eclipse.ui.statushandlers.StatusManager;
 import org.osgi.framework.BundleContext;
 
 import com.github.otymko.dt.bsl.lsconnector.listener.WindowEventListener;
@@ -50,15 +51,21 @@ public class BSLPlugin extends Plugin {
     private ScopedPreferenceStore preferenceStore;
 
     public static IStatus createErrorStatus(String message, Throwable throwable) {
-	return new Status(IStatus.ERROR, PLUGIN_ID, 0, message, throwable);
+	var status = new Status(IStatus.ERROR, PLUGIN_ID, 0, message, throwable);
+	StatusManager.getManager().handle(status, StatusManager.LOG);
+	return status;
     }
 
     public static IStatus createWarningStatus(final String message, Exception throwable) {
-	return new Status(IStatus.WARNING, PLUGIN_ID, 0, message, throwable);
+	var status = new Status(IStatus.WARNING, PLUGIN_ID, 0, message, throwable);
+	StatusManager.getManager().handle(status, StatusManager.LOG);
+	return status;
     }
 
     public static IStatus createWarningStatus(String message) {
-	return new Status(IStatus.WARNING, PLUGIN_ID, 0, message, null);
+	var status = new Status(IStatus.WARNING, PLUGIN_ID, 0, message, null);
+	StatusManager.getManager().handle(status, StatusManager.LOG);
+	return status;
     }
 
     @Override
