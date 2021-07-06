@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import com.github.otymko.dt.bsl.lsconnector.BSLPlugin;
@@ -61,9 +62,18 @@ public class LSService {
 	var externalJar = preferenceStore.getBoolean(BSLPreferencePage.EXTERNAL_JAR);
 	var isImageApp = !externalJar;
 	var pathToLSP = getPathToBSLLS();
+	var fileLSP = pathToLSP.toFile();
 
-	if (!pathToLSP.toFile().exists()) {
+	if (!fileLSP.exists()) {
 	    return;
+	}
+	
+	if (isImageApp && !fileLSP.canExecute()) {
+	    try {
+		fileLSP.setExecutable(true);
+	    } catch (SecurityException e) {
+		BSLPlugin.createErrorStatus("Не удалось установить право исполнения для файла процесса BSL LS", e);
+	    }
 	}
 
 	List<String> arguments = new ArrayList<>();
@@ -71,7 +81,12 @@ public class LSService {
 	    arguments.add(preferenceStore.getString(BSLPreferencePage.PATH_TO_JAVA));
 	    arguments.add("-jar");
 	}
-	arguments.add("\"" + pathToLSP.toString() + "\"");
+	
+	if (SystemUtils.IS_OS_UNIX) {
+	    arguments.add(pathToLSP.toString());
+	} else {
+	    arguments.add("\"" + pathToLSP.toString() + "\"");
+	}
 
 	if (pathToConfiguration.isPresent()) {
 	    arguments.add("--configuration");

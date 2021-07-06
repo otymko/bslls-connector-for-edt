@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.lang3.SystemUtils;
+
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Plugin;
@@ -150,11 +152,21 @@ public class BSLPlugin extends Plugin {
 
 	// проверим есть ли image app BSL LS
 	var pathToApp = Path.of(appDir.toString(), "bsl-language-server").toFile();
+	if (SystemUtils.IS_OS_LINUX) {
+	    pathToApp = Path.of(pathToApp.toString(), "bin").toFile();
+	} else if (SystemUtils.IS_OS_MAC) {
+	    pathToApp = Path.of(pathToApp.toString(), "Contents", "MacOS").toFile();
+	}
+
 	if (!pathToApp.exists()) {
 	    pathToApp.mkdir();
 	}
 
 	// путь к image app
-	pathToImageApp = Path.of(pathToApp.toString(), "bsl-language-server.exe");
+	if (SystemUtils.IS_OS_WINDOWS) {
+	    pathToImageApp = Path.of(pathToApp.toString(), "bsl-language-server.exe");
+	} else {
+	    pathToImageApp = Path.of(pathToApp.toString(), "bsl-language-server");
+	}
     }
 }
