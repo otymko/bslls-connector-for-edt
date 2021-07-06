@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.lang3.SystemUtils;
+
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Plugin;
@@ -14,6 +16,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
+import org.eclipse.ui.statushandlers.StatusManager;
 import org.osgi.framework.BundleContext;
 
 import com.github.otymko.dt.bsl.lsconnector.listener.WindowEventListener;
@@ -48,15 +51,21 @@ public class BSLPlugin extends Plugin {
     private ScopedPreferenceStore preferenceStore;
 
     public static IStatus createErrorStatus(String message, Throwable throwable) {
-	return new Status(IStatus.ERROR, PLUGIN_ID, 0, message, throwable);
+	var status = new Status(IStatus.ERROR, PLUGIN_ID, 0, message, throwable);
+	StatusManager.getManager().handle(status, StatusManager.LOG);
+	return status;
     }
 
     public static IStatus createWarningStatus(final String message, Exception throwable) {
-	return new Status(IStatus.WARNING, PLUGIN_ID, 0, message, throwable);
+	var status = new Status(IStatus.WARNING, PLUGIN_ID, 0, message, throwable);
+	StatusManager.getManager().handle(status, StatusManager.LOG);
+	return status;
     }
 
     public static IStatus createWarningStatus(String message) {
-	return new Status(IStatus.WARNING, PLUGIN_ID, 0, message, null);
+	var status = new Status(IStatus.WARNING, PLUGIN_ID, 0, message, null);
+	StatusManager.getManager().handle(status, StatusManager.LOG);
+	return status;
     }
 
     @Override
@@ -150,11 +159,21 @@ public class BSLPlugin extends Plugin {
 
 	// проверим есть ли image app BSL LS
 	var pathToApp = Path.of(appDir.toString(), "bsl-language-server").toFile();
+	if (SystemUtils.IS_OS_LINUX) {
+	    pathToApp = Path.of(pathToApp.toString(), "bin").toFile();
+	} else if (SystemUtils.IS_OS_MAC) {
+	    pathToApp = Path.of(pathToApp.toString(), "Contents", "MacOS").toFile();
+	}
+
 	if (!pathToApp.exists()) {
 	    pathToApp.mkdir();
 	}
 
 	// путь к image app
-	pathToImageApp = Path.of(pathToApp.toString(), "bsl-language-server.exe");
+	if (SystemUtils.IS_OS_WINDOWS) {
+	    pathToImageApp = Path.of(pathToApp.toString(), "bsl-language-server.exe");
+	} else {
+	    pathToImageApp = Path.of(pathToApp.toString(), "bsl-language-server");
+	}
     }
 }

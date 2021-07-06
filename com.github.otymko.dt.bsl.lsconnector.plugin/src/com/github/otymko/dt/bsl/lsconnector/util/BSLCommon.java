@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -138,7 +139,15 @@ public class BSLCommon {
     public String getLatestReleaseURL() {
 	// FIXME: переехать на получение последнего с GitHub
 	// нужно учесть, что мининимальная допустимая версия - 0.17.0
-	return "https://github.com/1c-syntax/bsl-language-server/releases/download/v0.17.0-RC4/bsl-language-server_win.zip";
+	var release_url = "https://github.com/1c-syntax/bsl-language-server/releases/download/v0.17.0-RC4/";
+	if (SystemUtils.IS_OS_WINDOWS) {
+	    release_url += "bsl-language-server_win.zip";
+	} else if (SystemUtils.IS_OS_MAC) {
+	    release_url += "bsl-language-server_mac.zip";
+	} else {
+	    release_url += "bsl-language-server_nix.zip";
+	}
+	return release_url;
     }
 
     public URI uri(URI uri) {
