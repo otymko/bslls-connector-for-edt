@@ -21,26 +21,26 @@ public class LanguageService {
      * Глобальные настройки плагина
      */
     private final PluginSetting setting;
-    
+
     /**
      * Путь к базовому каталогу проекта
      */
     private final Path rootPath;
-    
+
     private Process process;
     @Getter
     private BSLConnector connector;
-  
+
     public LanguageService(PluginSetting setting, Path rootPath) {
 	this.setting = setting;
 	this.rootPath = rootPath;
     }
-    
+
     public void start() {
 	createProcess();
 	connectToProcess();
     }
-    
+
     public void stop() {
 	if (connector != null) {
 	    connector.shutdown();
@@ -48,19 +48,19 @@ public class LanguageService {
 	}
 	clear();
     }
-    
+
     public void restart() {
 	stop();
 	start();
     }
-    
+
     public boolean isLaunched() {
 	return process != null && process.isAlive();
     }
-    
+
     private void createProcess() {
 	var pathToWorkspace = ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile().toPath();
-	var externalJar = false;
+	var externalJar = setting.isExternalJar();
 	var isImageApp = !externalJar;
 	var pathToLSP = getPathToBSLLS();
 
@@ -70,11 +70,11 @@ public class LanguageService {
 
 	List<String> arguments = new ArrayList<>();
 	if (!isImageApp) {
-//	    arguments.add(preferenceStore.getString(BSLPreferencePage.PATH_TO_JAVA));
+	    arguments.add(setting.getPathToJava());
 	    arguments.add("-jar");
 	}
 	arguments.add("\"" + pathToLSP.toString() + "\"");
-	
+
 	if (isImageApp) {
 	    arguments.add("lsp");
 	}
@@ -84,7 +84,7 @@ public class LanguageService {
 	    arguments.add("--configuration");
 	    arguments.add(optionalConfiguration.get().toString());
 	}
-	
+
 	BSLActivator.createWarningStatus(arguments.toString());
 
 	try {
@@ -100,26 +100,24 @@ public class LanguageService {
 	    BSLActivator.createWarningStatus("Не удалось запустить процесс BSL LS", e);
 	}
     }
-    
+
     private void connectToProcess() {
 	if (process == null) {
 	    return;
 	}
 	var client = new BSLLanguageClient();
 	connector = new BSLConnector(client, process.getInputStream(), process.getOutputStream(), rootPath);
-//	connector.setPathToRoot(ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile().toPath());
 	connector.startInThread();
 	BSLCore.getInstance().sleepCurrentThread(2000); // FIXME: Сколько нужно ждать?
 	connector.initialize();
     }
-    
+
     private void clear() {
-	process = null; 
+	process = null;
 	connector = null;
     }
-    
+
     private Path getPathToBSLLS() {
 	return setting.getPathToLS();
-//	return Path.of(Optional.of(preferenceStore.getString(BSLPreferencePage.PATH_TO_BSLLS)).orElse(""));
     }
 }
