@@ -7,13 +7,13 @@
   <parent>
     <groupId>com.github.otymko.dt.bsl.lsconnector</groupId>
     <artifactId>bom</artifactId>
-    <version>0.3.0-SNAPSHOT</version>
+    <version>0.3.0</version>
     <relativePath>./bom/pom.xml</relativePath>
   </parent>
 
   <groupId>com.github.otymko.dt.bsl.lsconnector</groupId>
   <artifactId>parent</artifactId>
-  <version>0.3.0-SNAPSHOT</version>
+  <version>0.3.0</version>
   <packaging>pom</packaging>
 
   <name>BSL LS connector for EDT</name>
