@@ -58,6 +58,8 @@ public class BSLConnector {
 
     public void startInThread() {
 	BSLPlugin.createWarningStatus("Запуск LSP");
+	launcher = LSPLauncher.createClientLauncher(client, in, out);
+	server = launcher.getRemoteProxy();
 	thread.setDaemon(true);
 	thread.setName(LAUNCHER_NAME);
 	thread.start();
@@ -163,9 +165,7 @@ public class BSLConnector {
     }
 
     private void start() {
-	launcher = LSPLauncher.createClientLauncher(client, in, out);
 	var future = launcher.startListening();
-	server = launcher.getRemoteProxy();
 	while (true) {
 	    try {
 		future.get();

@@ -101,7 +101,6 @@ public class LSService {
 	var client = new BSLLanguageClient();
 	connector = new BSLConnector(client, process.getInputStream(), process.getOutputStream());
 	connector.startInThread();
-	plugin.sleepCurrentThread(2000); // FIXME: Сколько нужно ждать?
 	connector.initialize();
     }
     
