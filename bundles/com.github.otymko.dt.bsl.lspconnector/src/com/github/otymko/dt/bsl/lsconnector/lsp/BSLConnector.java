@@ -40,7 +40,7 @@ import com.github.otymko.dt.bsl.lsconnector.BSLPlugin;
 import com.github.otymko.dt.bsl.lsconnector.util.BSLCommon;
 
 public class BSLConnector {
-    private static final int DEFAULT_TIMEOUT = 10;
+    private static final int DEFAULT_TIMEOUT = 30;
     private static final int DEFAULT_SMALL_TIMEOUT = 2;
     private static final String LAUNCHER_NAME = "BSLLanguageLauncher";
 
