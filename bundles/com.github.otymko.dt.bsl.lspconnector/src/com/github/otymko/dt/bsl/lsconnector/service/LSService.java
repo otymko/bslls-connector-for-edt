@@ -20,7 +20,6 @@ public class LSService {
     private final ScopedPreferenceStore preferenceStore;
     private Process process;
     private BSLConnector connector;
-    private Thread shutdownHook;
     
     public LSService(BSLPlugin plugin) {
 	this.plugin = plugin;
@@ -39,9 +38,6 @@ public class LSService {
                 stop();
                 return;
             }
-            Process owned = process;
-            shutdownHook = new Thread(() -> terminateProcess(owned), "BSLLanguageServerCleanup");
-            Runtime.getRuntime().addShutdownHook(shutdownHook);
             connectToProcess();
             windowsEventService.start();
         } catch (RuntimeException | LinkageError error) {
@@ -73,7 +69,6 @@ public class LSService {
             } finally {
                 terminateProcess(process);
                 if (!isLaunched()) {
-                    removeShutdownHook();
                     clear();
                 }
                 if (interrupted) {
@@ -94,17 +89,6 @@ public class LSService {
 
     public synchronized BSLConnector getConnector() {
         return connector;
-    }
-
-    private void removeShutdownHook() {
-        if (shutdownHook != null) {
-            try {
-                Runtime.getRuntime().removeShutdownHook(shutdownHook);
-            } catch (IllegalStateException ignored) {
-                // JVM shutdown is already running the captured-process cleanup.
-            }
-            shutdownHook = null;
-        }
     }
 
     private static void terminateProcess(Process owned) {
