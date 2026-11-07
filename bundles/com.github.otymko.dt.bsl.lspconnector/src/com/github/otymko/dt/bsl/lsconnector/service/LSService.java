@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
@@ -13,15 +14,13 @@ import com.github.otymko.dt.bsl.lsconnector.lsp.BSLConnector;
 import com.github.otymko.dt.bsl.lsconnector.lsp.BSLLanguageClient;
 import com.github.otymko.dt.bsl.lsconnector.ui.BSLPreferencePage;
 
-import lombok.Getter;
-
 public class LSService {
     private final BSLPlugin plugin;
     private final WindowsEventService windowsEventService;
     private final ScopedPreferenceStore preferenceStore;
     private Process process;
-    @Getter
     private BSLConnector connector;
+    private Thread shutdownHook;
     
     public LSService(BSLPlugin plugin) {
 	this.plugin = plugin;
@@ -29,30 +28,116 @@ public class LSService {
 	preferenceStore = plugin.getPreferenceStore();
     }
     
-    public void start() {
-	createProcess();
-	connectToProcess();
-	if (isLaunched()) {
-	    windowsEventService.start();
-	}
+    public synchronized void start() {
+        if (isLaunched()) {
+            return;
+        }
+        stop();
+        try {
+            createProcess();
+            if (!isLaunched()) {
+                stop();
+                return;
+            }
+            Process owned = process;
+            shutdownHook = new Thread(() -> terminateProcess(owned), "BSLLanguageServerCleanup");
+            Runtime.getRuntime().addShutdownHook(shutdownHook);
+            connectToProcess();
+            windowsEventService.start();
+        } catch (RuntimeException | LinkageError error) {
+            stop();
+            throw error;
+        }
     }
     
-    public void stop() {
-	if (connector != null) {
-	    connector.shutdown();
-	    connector.exit();
-	}
-	windowsEventService.stop();
-	clear();
+    public synchronized void stop() {
+        boolean interrupted = Thread.interrupted();
+        try {
+            if (connector != null && isLaunched()) {
+                try {
+                    connector.shutdown().get(2, TimeUnit.SECONDS);
+                } catch (InterruptedException error) {
+                    interrupted = true;
+                } catch (Exception | LinkageError error) {
+                    BSLPlugin.createErrorStatus("BSL LS shutdown did not complete", error);
+                }
+                try {
+                    connector.exit();
+                } catch (RuntimeException | LinkageError error) {
+                    BSLPlugin.createErrorStatus("BSL LS exit failed", error);
+                }
+            }
+        } finally {
+            try {
+                windowsEventService.stop();
+            } finally {
+                terminateProcess(process);
+                if (!isLaunched()) {
+                    removeShutdownHook();
+                    clear();
+                }
+                if (interrupted) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
     }
     
-    public void restart() {
+    public synchronized void restart() {
 	stop();
 	start();
     }
     
-    public boolean isLaunched() {
+    public synchronized boolean isLaunched() {
 	return process != null && process.isAlive();
+    }
+
+    public synchronized BSLConnector getConnector() {
+        return connector;
+    }
+
+    private void removeShutdownHook() {
+        if (shutdownHook != null) {
+            try {
+                Runtime.getRuntime().removeShutdownHook(shutdownHook);
+            } catch (IllegalStateException ignored) {
+                // JVM shutdown is already running the captured-process cleanup.
+            }
+            shutdownHook = null;
+        }
+    }
+
+    private static void terminateProcess(Process owned) {
+        if (owned == null) {
+            return;
+        }
+        boolean interrupted = Thread.interrupted();
+        try {
+            try {
+                if (owned.isAlive() && !owned.waitFor(200, TimeUnit.MILLISECONDS)) {
+                    owned.destroy();
+                    if (!owned.waitFor(1, TimeUnit.SECONDS)) {
+                        owned.destroyForcibly();
+                        owned.waitFor(2, TimeUnit.SECONDS);
+                    }
+                }
+            } catch (InterruptedException error) {
+                interrupted = true;
+                owned.destroyForcibly();
+                try {
+                    owned.waitFor(2, TimeUnit.SECONDS);
+                } catch (InterruptedException secondInterrupt) {
+                    interrupted = true;
+                }
+            }
+        } finally {
+            try { owned.getOutputStream().close(); } catch (IOException ignored) { }
+            try { owned.getInputStream().close(); } catch (IOException ignored) { }
+            try { owned.getErrorStream().close(); } catch (IOException ignored) { }
+            if (interrupted) {
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 
     private void createProcess() {
@@ -71,7 +156,7 @@ public class LSService {
 	    arguments.add(preferenceStore.getString(BSLPreferencePage.PATH_TO_JAVA));
 	    arguments.add("-jar");
 	}
-	arguments.add("\"" + pathToLSP.toString() + "\"");
+	arguments.add(pathToLSP.toString());
 
 	if (pathToConfiguration.isPresent()) {
 	    arguments.add("--configuration");

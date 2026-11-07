@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.github.otymko.dt.bsl.lsconnector.lsp.BSLConnector;
 import com.github.otymko.dt.bsl.lsconnector.lsp.BSLLanguageClient;
+import com.github.otymko.dt.bsl.lsconnector.BSLPlugin;
 
 /** Delaying the listening thread must not delay publication of the RPC proxy. */
 public class ConnectorStartupTest {
@@ -44,7 +45,7 @@ public class ConnectorStartupTest {
             allowListener.countDown();
             delayed.join(5000);
         }
-        if (delayed.isAlive() || listenerError.get() != null) {
+        if (delayed.isAlive() || listenerError.get() != null || BSLPlugin.ERRORS.get() != 0) {
             throw new AssertionError("Listener did not finish normally", listenerError.get());
         }
     }
